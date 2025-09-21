@@ -55,7 +55,7 @@
       <div class="settings-container">
         <div class="settings-section">
           <h5>Account Information</h5>
-          <form>
+          <form id="accountForm">
             <div class="mb-3">
               <label class="form-label">Username</label>
               <input id="setUsername" type="text" class="form-control" value="Leonard Tariman">
@@ -73,7 +73,7 @@
         </div>
         <div class="settings-section">
           <h5>Change Password</h5>
-          <form>
+          <form id="passwordForm">
             <div class="mb-3">
               <label class="form-label">Current Password</label>
               <input type="password" class="form-control">
@@ -128,6 +128,43 @@
           } catch(e) { /* ignore */ }
         })
         .catch(function(){ /* ignore */ });
+
+      var accountForm = document.getElementById('accountForm');
+      if (accountForm) {
+        accountForm.addEventListener('submit', function(ev){
+          ev.preventDefault();
+          var username = document.getElementById('setUsername').value.trim();
+          var email = document.getElementById('setEmail').value.trim();
+          var contact = document.getElementById('setContact').value.trim();
+          var fd = new FormData();
+          fd.append('username', username);
+          fd.append('email', email);
+          fd.append('contact', contact);
+          fetch('api-user-profile.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: fd
+          }).then(function(r){
+            return r.json().then(function(j){ return { ok: r.ok, status: r.status, body: j }; });
+          }).then(function(res){
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert mt-3 ' + (res.ok ? 'alert-success' : 'alert-danger');
+            alertDiv.textContent = res.ok ? 'Profile updated successfully.' : (res.body && res.body.error ? res.body.error : 'Update failed');
+            accountForm.appendChild(alertDiv);
+            setTimeout(function(){ alertDiv.remove(); }, 3000);
+            if (res.ok && username) {
+              var elSidebar = document.getElementById('sidebarName');
+              if (elSidebar) elSidebar.textContent = username;
+            }
+          }).catch(function(){
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert mt-3 alert-danger';
+            alertDiv.textContent = 'Network error. Please try again.';
+            accountForm.appendChild(alertDiv);
+            setTimeout(function(){ alertDiv.remove(); }, 3000);
+          });
+        });
+      }
     });
   </script>
 </body>

@@ -16,6 +16,28 @@ if ($conn->connect_error) {
   exit();
 }
 
+// Handle individual scholarship detail request
+if (isset($_GET['id'])) {
+  $scholarshipId = (int) $_GET['id'];
+  $sql = "SELECT * FROM scholarships WHERE id = ?";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('i', $scholarshipId);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  $scholarship = $result->fetch_assoc();
+  $stmt->close();
+  $conn->close();
+  
+  if ($scholarship) {
+    echo json_encode($scholarship);
+  } else {
+    http_response_code(404);
+    echo json_encode(['error' => 'Scholarship not found']);
+  }
+  exit();
+}
+
+// Handle list request
 $q = trim($_GET['q'] ?? '');
 $sql = "SELECT id, title, sponsor, image_path FROM scholarships";
 if ($q !== '') {

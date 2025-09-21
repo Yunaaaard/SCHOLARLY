@@ -42,15 +42,16 @@
     <main class="main-content flex-grow-1 p-4">
       <h2 class="fw-bold mb-4">Edit Profile</h2>
 
-      <form class="w-75">
+      <form class="w-75" id="editForm" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="profilePic" class="form-label">Profile Picture</label>
-          <input type="file" class="form-control" id="profilePic">
+          <input type="file" class="form-control" id="profilePic" accept="image/*">
+          <div class="form-text">Accepted formats: JPG, PNG, GIF. Max size: 5MB</div>
         </div>
 
         <div class="mb-3">
           <label for="fullName" class="form-label">Full Name</label>
-          <input type="text" class="form-control" id="fullName" value="Leonard Tariman">
+          <input type="text" class="form-control" id="fullName" value="Leonard Tariman" required>
         </div>
 
         <div class="mb-3">
@@ -60,7 +61,12 @@
 
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" value="leonard@email.com">
+          <input type="email" class="form-control" id="email" value="" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label for="contact" class="form-label">Contact</label>
+          <input type="text" class="form-control" id="contact" value="">
         </div>
 
         <div class="mb-3">
@@ -89,11 +95,52 @@
             if (data.email) {
               document.getElementById('email').value = data.email;
             }
-            if (data.contact && document.getElementById('contact')) {
-              document.getElementById('contact').value = data.contact;
+            if (document.getElementById('contact')) {
+              document.getElementById('contact').value = data.contact || '';
             }
           } catch (e) {}
         }).catch(function(){ /* ignore */ });
+
+      var form = document.getElementById('editForm');
+      if (form) {
+        form.addEventListener('submit', function(ev){
+          ev.preventDefault();
+          var username = document.getElementById('fullName').value.trim();
+          var email = document.getElementById('email').value.trim();
+          var contact = document.getElementById('contact').value.trim();
+          var profilePic = document.getElementById('profilePic').files[0];
+          
+          if (!username || !email) { return; }
+          
+          var fd = new FormData();
+          fd.append('username', username);
+          fd.append('email', email);
+          fd.append('contact', contact);
+          if (profilePic) {
+            fd.append('profilePic', profilePic);
+          }
+          
+          fetch('api-user-profile.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: fd
+          }).then(function(r){
+            return r.json().then(function(j){ return { ok: r.ok, status: r.status, body: j }; });
+          }).then(function(res){
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert mt-3 ' + (res.ok ? 'alert-success' : 'alert-danger');
+            alertDiv.textContent = res.ok ? 'Profile updated successfully.' : (res.body && res.body.error ? res.body.error : 'Update failed');
+            form.appendChild(alertDiv);
+            setTimeout(function(){ alertDiv.remove(); }, 3000);
+          }).catch(function(){
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert mt-3 alert-danger';
+            alertDiv.textContent = 'Network error. Please try again.';
+            form.appendChild(alertDiv);
+            setTimeout(function(){ alertDiv.remove(); }, 3000);
+          });
+        });
+      }
     })();
   </script>
 </body>

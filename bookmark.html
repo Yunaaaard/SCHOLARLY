@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scholarly Dashboard</title>
+  <title>Scholarly Bookmarks</title>
   <link 
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
     rel="stylesheet">
@@ -12,13 +12,15 @@
 <body>
   <div class="dashboard d-flex">
     <aside class="sidebar d-flex flex-column align-items-center p-3">
-      <img src="assets/images/Group 44.png" alt="Scholarly Logo" class="logo mb-4">
+      <div class="logo-section mb-4">
+        <h1 class="logo-text">SCHOLARLY</h1>
+      </div>
       <div class="profile text-center mb-4">
         <img src="assets/Images/profile.png" 
              alt="Profile" class="profile-img mb-2">
-        <h2 id="sidebarName" class="h5 fw-bold">Leonard Tariman</h2>
+        <h2 id="sidebarName" class="h5 fw-bold">Jerald Monroid</h2>
         <p class="small mb-2">STUDENT</p>
-        <a href="edit.html" class="btn btn-primary rounded-pill">Edit Profile</a>
+        <a href="edit.html" class="btn btn-primary rounded-pill">EDIT PROFILE</a>
       </div>
       <hr class="w-100">
 
@@ -27,26 +29,90 @@
           <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/ypvgcziq_expires_30_days.png"> Home
         </a>
         <a href="settings.html" class="nav-link d-flex align-items-center gap-2 text-white">
-  <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/xqldtbo1_expires_30_days.png"> Settings
-</a>
-
-        <a href="bookmark.html" class="nav-link d-flex align-items-center gap-2 text-white">
+          <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/xqldtbo1_expires_30_days.png"> Settings
+        </a>
+        <a href="bookmark.html" class="nav-link d-flex align-items-center gap-2 text-white active">
           <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/ed6vfccw_expires_30_days.png"> Bookmarks
+        </a>
+        <a href="notifications.html" class="nav-link d-flex align-items-center gap-2 text-white">
+          <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/notification-icon.png"> Notifications
         </a>
         <a href="logout.php" class="nav-link d-flex align-items-center gap-2 text-white">
           <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/2y4kk645_expires_30_days.png"> Logout
         </a>
       </nav>
+      
+      <div class="sidebar-footer mt-auto">
+        <small class="text-muted">WEBPAGE SETTINGS</small>
+      </div>
+      
+      <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <span>←</span>
+      </button>
     </aside>
 
     <main class="main-content flex-grow-1 p-4">
-
       <h2 class="fw-bold mb-4">Bookmarks</h2>
-      <div id="bookmarkCards" class="d-flex flex-column gap-3"></div>
+      <div id="bookmarkCards" class="cards d-flex flex-column gap-3"></div>
     </main>
   </div>
+
+  <!-- Scholarship Detail Modal -->
+  <div id="scholarshipModal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="scholarship-detail">
+            <div class="scholarship-header d-flex align-items-center gap-3 mb-4">
+              <img id="modalLogo" src="" alt="Logo" class="scholarship-logo">
+              <div>
+                <h2 id="modalTitle" class="scholarship-title mb-1"></h2>
+                <p id="modalSponsor" class="scholarship-sponsor mb-0"></p>
+              </div>
+            </div>
+            
+            <div class="scholarship-content">
+              <div class="eligibility-section mb-4">
+                <h5 class="section-title text-primary mb-3">Eligibility</h5>
+                <ul id="modalEligibility" class="eligibility-list"></ul>
+              </div>
+              
+              <div class="benefits-section mb-4">
+                <h5 class="section-title mb-3">
+                  <span class="benefits-icon">🎓</span> Benefits
+                </h5>
+                <ul id="modalBenefits" class="benefits-list"></ul>
+              </div>
+              
+              <div class="requirements-section mb-4">
+                <h5 class="section-title mb-3">
+                  <span class="requirements-icon">✅</span> Application Requirements
+                </h5>
+                <ul id="modalRequirements" class="requirements-list"></ul>
+              </div>
+              
+              <div class="scholarship-meta d-flex justify-content-between align-items-center mb-4">
+                <div>
+                  <strong>DATE OF EFFECT:</strong> <span id="modalDate"></span>
+                </div>
+                <div>
+                  <strong>CONTACT & DETAILS:</strong> <span id="modalContact"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary btn-apply" id="applyBtn">APPLY</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="user-hydrate.js.php"></script>
   <script src="user-hydrate.js.php"></script>
   <script>
     (function(){
@@ -57,30 +123,179 @@
         .then(function(items){
           if (!Array.isArray(items) || items.length === 0) {
             var info = document.createElement('div');
-            info.className = 'alert alert-info';
-            info.textContent = 'No bookmarks yet.';
+            info.className = 'alert alert-info text-center py-5';
+            info.innerHTML = '<h4>No bookmarks yet</h4><p class="mb-0">Start bookmarking scholarships to see them here!</p>';
             wrap.appendChild(info);
             return;
           }
           items.forEach(function(s){
             var card = document.createElement('div');
-            card.className = 'card p-3 d-flex flex-row justify-content-between align-items-center shadow-sm';
+            card.className = 'card position-relative';
+            
             var left = document.createElement('div');
-            left.className = 'card-left d-flex align-items-center gap-3';
+            left.className = 'card-left';
             var img = document.createElement('img');
-            img.width = 65; img.alt = 'logo';
+            img.alt = 'logo';
             img.src = s.image_path && s.image_path.length ? s.image_path : 'assets/Images/image.png';
-            var meta = document.createElement('div');
-            var h = document.createElement('h3'); h.className = 'h6 fw-bold mb-1'; h.textContent = s.title || '';
-            var p = document.createElement('p'); p.className = 'small mb-0'; p.textContent = s.sponsor || '';
-            meta.appendChild(h); meta.appendChild(p);
-            left.appendChild(img); left.appendChild(meta);
-            var btn = document.createElement('a'); btn.className = 'btn btn-primary btn-sm rounded-pill'; btn.href = '#'; btn.textContent = 'View';
-            card.appendChild(left); card.appendChild(btn);
+            left.appendChild(img);
+            
+            var middle = document.createElement('div');
+            middle.className = 'card-middle';
+            var title = document.createElement('h3'); 
+            title.className = 'card-title'; 
+            title.textContent = s.title || '';
+            var sponsor = document.createElement('p'); 
+            sponsor.className = 'card-sponsor'; 
+            sponsor.textContent = s.sponsor || '';
+            middle.appendChild(title);
+            middle.appendChild(sponsor);
+            
+            var right = document.createElement('div');
+            right.className = 'card-right';
+            
+            // Bookmark icon (filled for bookmarked items)
+            var bookmarkIcon = document.createElement('button');
+            bookmarkIcon.className = 'bookmark-icon bookmarked';
+            bookmarkIcon.onclick = function() { toggleBookmark(s.id, bookmarkIcon); };
+            
+            var btn = document.createElement('button'); 
+            btn.className = 'btn btn-primary'; 
+            btn.textContent = 'VIEW';
+            btn.onclick = function() { showScholarshipDetails(s.id); };
+            
+            right.appendChild(bookmarkIcon);
+            right.appendChild(btn);
+            
+            card.appendChild(left); 
+            card.appendChild(middle);
+            card.appendChild(right);
             wrap.appendChild(card);
           });
         });
     })();
+
+    function toggleBookmark(scholarshipId, iconElement) {
+      fetch('api-bookmarks.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scholarship_id: scholarshipId, action: 'toggle' })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success && !data.bookmarked) {
+          // Remove the card from bookmarks page
+          iconElement.closest('.card').remove();
+          // Check if no more bookmarks
+          var wrap = document.getElementById('bookmarkCards');
+          if (wrap.children.length === 0) {
+            var info = document.createElement('div');
+            info.className = 'alert alert-info text-center py-5';
+            info.innerHTML = '<h4>No bookmarks yet</h4><p class="mb-0">Start bookmarking scholarships to see them here!</p>';
+            wrap.appendChild(info);
+          }
+        } else if (data.success) {
+          // Update visual state
+          if (data.bookmarked) {
+            iconElement.classList.add('bookmarked');
+          } else {
+            iconElement.classList.remove('bookmarked');
+          }
+        }
+      })
+      .catch(function() {});
+    }
+
+    function toggleSidebar() {
+      var sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('collapsed');
+    }
+
+    var currentScholarshipId = null;
+
+    function showScholarshipDetails(scholarshipId) {
+      currentScholarshipId = scholarshipId;
+      fetch('api-scholarships.php?id=' + scholarshipId, { credentials: 'same-origin' })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function(data) {
+          // Populate modal with scholarship data
+          document.getElementById('modalLogo').src = data.image_path || 'assets/Images/image.png';
+          document.getElementById('modalTitle').textContent = data.title || '';
+          document.getElementById('modalSponsor').textContent = data.sponsor || '';
+          
+          // Display description in eligibility section (since we don't have separate fields)
+          var eligibilityList = document.getElementById('modalEligibility');
+          eligibilityList.innerHTML = '';
+          if (data.description) {
+            var li = document.createElement('li');
+            li.textContent = data.description;
+            eligibilityList.appendChild(li);
+          }
+          
+          // Hide benefits and requirements sections since we don't have this data
+          document.querySelector('.benefits-section').style.display = 'none';
+          document.querySelector('.requirements-section').style.display = 'none';
+          
+          // Display date range and contact
+          var dateRange = '';
+          if (data.start_date && data.end_date) {
+            dateRange = data.start_date + ' - ' + data.end_date;
+          } else if (data.start_date) {
+            dateRange = 'From ' + data.start_date;
+          } else if (data.end_date) {
+            dateRange = 'Until ' + data.end_date;
+          } else {
+            dateRange = 'N/A';
+          }
+          document.getElementById('modalDate').textContent = dateRange;
+          document.getElementById('modalContact').textContent = data.email || data.phone || 'N/A';
+          
+          // Reset apply button
+          var applyBtn = document.getElementById('applyBtn');
+          applyBtn.textContent = 'APPLY';
+          applyBtn.disabled = false;
+          applyBtn.onclick = function() { submitApplication(currentScholarshipId); };
+          
+          // Show modal
+          var modal = new bootstrap.Modal(document.getElementById('scholarshipModal'));
+          modal.show();
+        })
+        .catch(function() {
+          alert('Failed to load scholarship details');
+        });
+    }
+
+    function submitApplication(scholarshipId) {
+      var applyBtn = document.getElementById('applyBtn');
+      applyBtn.disabled = true;
+      applyBtn.textContent = 'APPLYING...';
+      
+      var formData = new FormData();
+      formData.append('scholarship_id', scholarshipId);
+      
+      fetch('api-applications.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          applyBtn.textContent = 'APPLIED ✓';
+          applyBtn.style.backgroundColor = '#28a745';
+          alert('Application submitted successfully!');
+        } else {
+          applyBtn.textContent = 'APPLY';
+          applyBtn.disabled = false;
+          alert(data.error || 'Failed to submit application');
+        }
+      })
+      .catch(function() {
+        applyBtn.textContent = 'APPLY';
+        applyBtn.disabled = false;
+        alert('Failed to submit application');
+      });
+    }
   </script>
 </body>
 </html>

@@ -44,13 +44,26 @@ body {
 }
 
 .sidebar {
-  width: 260px;
+  width: 280px;
   background: #A4A4D7; 
   color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  position: relative;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .profile,
+.sidebar.collapsed .nav,
+.sidebar.collapsed .sidebar-footer {
+  display: none;
 }
 .add-scholarship-heading img {
   width: 38px;         
@@ -63,6 +76,14 @@ body {
   font-weight: 700;
   color: #A4A4D7;        
   letter-spacing: 0.5px;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 2px;
+  margin: 0;
 }
 
 .sidebar .logo {
@@ -153,14 +174,35 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
-.controls input {
-  width: 350px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  z-index: 2;
+}
+
+.search-input {
+  width: 400px;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #A4A4D7;
+  box-shadow: 0 0 0 2px rgba(164, 164, 215, 0.2);
 }
 
 .filter-sort {
@@ -169,15 +211,26 @@ body {
 }
 
 .btn-secondary {
-  background: #eee;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
+  background: #f8f9fa;
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
   cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: #ddd;
+  background: #e9ecef;
+  border-color: #A4A4D7;
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .cards {
@@ -189,37 +242,73 @@ body {
 .card {
   background: white;
   border-radius: 12px;
-  padding: 15px 20px;
+  padding: 20px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   color: #333;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #f0f0f0;
+  position: relative;
+  margin-bottom: 15px;
+  gap: 20px;
+  min-height: 100px;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
 .card-left {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 15px;
 }
 
 .card-left img {
-  width: 65px;
-  height: 65px;
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.card-middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-left: 10px;
+}
+
+.card-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  min-width: 120px;
 }
 
 .btn-primary {
   background-color: #8b75d7; 
   color: white;
-  padding: 8px 18px;
+  padding: 10px 24px;
   border: none;
-  border-radius: 20px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #5d5dae;
+  background: #6b5bb8;
+  transform: translateY(-1px);
 }
 
 .btn-primary.small {
@@ -306,4 +395,197 @@ body {
   height: 100%;
   opacity: 0;
   cursor: pointer;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  right: -15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #A4A4D7;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #8b8bc7;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  text-align: center;
+}
+
+.sidebar-footer small {
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+}
+
+.bookmark-icon {
+  transition: all 0.2s ease;
+  z-index: 10;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bookmark-icon:hover {
+  transform: scale(1.1);
+}
+
+.bookmark-icon::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: #ccc;
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+  transition: all 0.2s ease;
+}
+
+.bookmark-icon.bookmarked::before {
+  background: #ffd700;
+}
+
+/* Scholarship Modal Styles */
+.scholarship-detail {
+  padding: 20px;
+}
+
+.scholarship-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.scholarship-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.scholarship-sponsor {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.eligibility-list,
+.benefits-list,
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.eligibility-list li,
+.benefits-list li,
+.requirements-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.eligibility-list li:last-child,
+.benefits-list li:last-child,
+.requirements-list li:last-child {
+  border-bottom: none;
+}
+
+.benefits-icon,
+.requirements-icon {
+  margin-right: 8px;
+}
+
+.scholarship-meta {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.scholarship-meta strong {
+  color: #333;
+}
+
+.btn-apply {
+  background-color: #8b75d7;
+  border: none;
+  padding: 12px 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-apply:hover {
+  background-color: #6b5bb8;
+}
+
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 20px 0 20px;
+}
+
+.modal-body {
+  padding: 0 20px 20px 20px;
+}
+
+.modal-footer {
+  border-top: 1px solid #f0f0f0;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.card-sponsor {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  font-weight: 400;
 }
