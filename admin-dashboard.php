@@ -27,8 +27,7 @@ $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE id IN (1, 2)")
 $userCount = $result->fetch_assoc()['count'];
 if ($userCount < 2) {
   $userSql = "INSERT IGNORE INTO users (id, username, email, contact, password) VALUES 
-              (1, 'John Doe', 'john.doe@example.com', '123-456-7890', '$2y$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-              (2, 'Jane Smith', 'jane.smith@example.com', '098-765-4321', '$2y$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')";
+              (1, 'Jane Smith', 'jane.smith@example.com', '098-765-4321', '$2y$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')";
   $conn->query($userSql);
 }
 
