@@ -59,10 +59,10 @@ if ($q !== '') {
         <a href="studentmanagementboard.php" class="nav-link active d-flex align-items-center gap-2 text-white">
           <img src="assets/Images/ph_student-bold.png" alt=""> Student Management
         </a>
-        <a href="#" class="nav-link d-flex align-items-center gap-2 text-white" data-bs-toggle="modal" data-bs-target="#logoutModal">
-  <img src="assets/Images/weui_lock-outlined.png" alt=""> Logout
+        <a href="logout.php" class="nav-link d-flex align-items-center gap-2 text-white" 
+   data-bs-toggle="modal" data-bs-target="#logoutModal">
+  <i class="bi bi-box-arrow-right"></i> Logout
 </a>
-
       </nav>
     </aside>
 
