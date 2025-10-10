@@ -66,16 +66,48 @@ if ($count == 0) {
 }
 
 $q = trim($_GET['q'] ?? '');
-$sql = "SELECT s.id, s.title, s.sponsor, s.category, s.start_date, s.end_date, s.image_path, 
-               COUNT(a.id) as application_count
-        FROM scholarships s
-        LEFT JOIN applications a ON s.id = a.scholarship_id
-        GROUP BY s.id, s.title, s.sponsor, s.category, s.start_date, s.end_date, s.image_path";
+$category = trim($_GET['category'] ?? '');
+$sort = trim($_GET['sort'] ?? '');
+
+$baseSql = "SELECT s.id, s.title, s.sponsor, s.category, s.start_date, s.end_date, s.image_path,
+                   COUNT(a.id) as application_count
+            FROM scholarships s
+            LEFT JOIN applications a ON s.id = a.scholarship_id";
+
+$where = [];
+$bindTypes = '';
+$bindValues = [];
+
 if ($q !== '') {
-  $sql .= " HAVING s.title LIKE ? OR s.sponsor LIKE ? OR s.category LIKE ?";
-  $stmt = $conn->prepare($sql);
+  $where[] = "(s.title LIKE ? OR s.sponsor LIKE ? OR s.category LIKE ?)";
+  $bindTypes .= 'sss';
   $like = "%$q%";
-  $stmt->bind_param('sss', $like, $like, $like);
+  $bindValues[] = $like; $bindValues[] = $like; $bindValues[] = $like;
+}
+if ($category !== '') {
+  $where[] = "s.category = ?";
+  $bindTypes .= 's';
+  $bindValues[] = $category;
+}
+
+$sql = $baseSql;
+if (!empty($where)) {
+  $sql .= ' WHERE ' . implode(' AND ', $where);
+}
+$sql .= " GROUP BY s.id, s.title, s.sponsor, s.category, s.start_date, s.end_date, s.image_path";
+
+switch ($sort) {
+  case 'title_asc': $sql .= " ORDER BY s.title ASC"; break;
+  case 'title_desc': $sql .= " ORDER BY s.title DESC"; break;
+  case 'start_new': $sql .= " ORDER BY s.start_date DESC"; break;
+  case 'end_new': $sql .= " ORDER BY s.end_date DESC"; break;
+  case 'apps_high': $sql .= " ORDER BY application_count DESC"; break;
+  default: $sql .= " ORDER BY s.id DESC"; break;
+}
+
+if ($bindTypes !== '') {
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param($bindTypes, ...$bindValues);
   $stmt->execute();
   $scholarships = $stmt->get_result();
 } else {
@@ -127,8 +159,24 @@ if ($q !== '') {
 
     <main class="main-content flex-grow-1 p-4">
       <div class="controls d-flex justify-content-between align-items-center mb-4">
-        <form class="w-50" method="GET" action="admin-dashboard.php">
-          <input type="text" name="q" value="<?php echo htmlspecialchars($q); ?>" class="form-control" placeholder="Search available scholarships">
+        <form class="d-flex gap-2 w-100" method="GET" action="admin-dashboard.php">
+          <input type="text" name="q" value="<?php echo htmlspecialchars($q); ?>" class="form-control" placeholder="Search by title, sponsor or category">
+          <select name="category" class="form-select" style="max-width: 200px;">
+            <option value="">All Categories</option>
+            <option value="Company" <?php echo $category==='Company'?'selected':''; ?>>Company</option>
+            <option value="School" <?php echo $category==='School'?'selected':''; ?>>School</option>
+            <option value="Organization" <?php echo $category==='Organization'?'selected':''; ?>>Organization</option>
+          </select>
+          <select name="sort" class="form-select" style="max-width: 200px;">
+            <option value="">Sort: Default</option>
+            <option value="title_asc" <?php echo $sort==='title_asc'?'selected':''; ?>>Title A-Z</option>
+            <option value="title_desc" <?php echo $sort==='title_desc'?'selected':''; ?>>Title Z-A</option>
+            <option value="start_new" <?php echo $sort==='start_new'?'selected':''; ?>>Newest Start Date</option>
+            <option value="end_new" <?php echo $sort==='end_new'?'selected':''; ?>>Newest End Date</option>
+            <option value="apps_high" <?php echo $sort==='apps_high'?'selected':''; ?>>Most Applications</option>
+          </select>
+          <button class="btn btn-primary" type="submit">Apply</button>
+          <a class="btn btn-outline-secondary" href="admin-dashboard.php">Reset</a>
         </form>
       </div>
 

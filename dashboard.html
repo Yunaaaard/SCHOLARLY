@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="assets/css/dashboard.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body>    
   <div class="dashboard d-flex">
     <aside class="sidebar d-flex flex-column align-items-center p-3">
   <img src="assets/images/Group 44.png" alt="Scholarly Logo" class="logo mb-4 sidebar-logo">
@@ -161,56 +161,128 @@
         .then(function(items){
           var wrap = document.getElementById('scholarshipCards');
           if (!Array.isArray(items) || !wrap) return;
-          if (items.length === 0) {
-            var info = document.createElement('div');
-            info.className = 'alert alert-info mb-0';
-            info.textContent = 'No scholarships available.';
-            wrap.appendChild(info);
-            return;
+
+          var allItems = items.slice(0);
+          var sortAsc = true;
+          var currentCategory = '';
+
+          function clearWrap() {
+            while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
           }
-          items.forEach(function(s) {
-            var card = document.createElement('div');
-            card.className = 'card position-relative';
-            
-            var left = document.createElement('div');
-            left.className = 'card-left';
-            var img = document.createElement('img');
-            img.alt = 'logo';
-            img.src = s.image_path && s.image_path.length ? s.image_path : 'assets/Images/image.png';
-            left.appendChild(img);
-            
-            var middle = document.createElement('div');
-            middle.className = 'card-middle';
-            var title = document.createElement('h3'); 
-            title.className = 'card-title'; 
-            title.textContent = s.title || '';
-            var sponsor = document.createElement('p'); 
-            sponsor.className = 'card-sponsor'; 
-            sponsor.textContent = s.sponsor || '';
-            middle.appendChild(title);
-            middle.appendChild(sponsor);
-            
-            var right = document.createElement('div');
-            right.className = 'card-right';
-            
-            // Bookmark icon positioned next to VIEW button
-            var bookmarkIcon = document.createElement('button');
-            bookmarkIcon.className = 'bookmark-icon';
-            bookmarkIcon.onclick = function() { toggleBookmark(s.id, bookmarkIcon); };
-            
-            var btn = document.createElement('button'); 
-            btn.className = 'btn btn-primary'; 
-            btn.textContent = 'VIEW';
-            btn.onclick = function() { showScholarshipDetails(s.id); };
-            
-            right.appendChild(bookmarkIcon);
-            right.appendChild(btn);
-            
-            card.appendChild(left); 
-            card.appendChild(middle);
-            card.appendChild(right);
-            wrap.appendChild(card);
-          });
+
+          function render(list) {
+            clearWrap();
+            if (!list || list.length === 0) {
+              var info = document.createElement('div');
+              info.className = 'alert alert-info mb-0';
+              info.textContent = 'No scholarships available.';
+              wrap.appendChild(info);
+              return;
+            }
+            list.forEach(function(s){
+              var card = document.createElement('div');
+              card.className = 'card position-relative';
+
+              var left = document.createElement('div');
+              left.className = 'card-left';
+              var img = document.createElement('img');
+              img.alt = 'logo';
+              img.src = s.image_path && s.image_path.length ? s.image_path : 'assets/Images/image.png';
+              left.appendChild(img);
+
+              var middle = document.createElement('div');
+              middle.className = 'card-middle';
+              var title = document.createElement('h3');
+              title.className = 'card-title';
+              title.textContent = s.title || '';
+              var sponsor = document.createElement('p');
+              sponsor.className = 'card-sponsor';
+              sponsor.textContent = s.sponsor || '';
+              middle.appendChild(title);
+              middle.appendChild(sponsor);
+
+              var right = document.createElement('div');
+              right.className = 'card-right';
+
+              var bookmarkIcon = document.createElement('button');
+              bookmarkIcon.className = 'bookmark-icon';
+              bookmarkIcon.onclick = function(){ toggleBookmark(s.id, bookmarkIcon); };
+
+              var btn = document.createElement('button');
+              btn.className = 'btn btn-primary';
+              btn.textContent = 'VIEW';
+              btn.onclick = function(){ showScholarshipDetails(s.id); };
+
+              right.appendChild(bookmarkIcon);
+              right.appendChild(btn);
+
+              card.appendChild(left);
+              card.appendChild(middle);
+              card.appendChild(right);
+              wrap.appendChild(card);
+            });
+          }
+
+          function applyFilters() {
+            var q = (document.querySelector('.search-input')?.value || '').toLowerCase();
+            var filtered = allItems.filter(function(it){
+              var t = (it.title || '').toLowerCase();
+              var sp = (it.sponsor || '').toLowerCase();
+              var catOk = currentCategory ? (it.category === currentCategory) : true;
+              var qOk = !q || t.indexOf(q) !== -1 || sp.indexOf(q) !== -1;
+              return catOk && qOk;
+            });
+            filtered.sort(function(a, b){
+              var at = (a.title || '').toLowerCase();
+              var bt = (b.title || '').toLowerCase();
+              if (at < bt) return sortAsc ? -1 : 1;
+              if (at > bt) return sortAsc ? 1 : -1;
+              return 0;
+            });
+            return filtered;
+          }
+
+          // Initial render
+          render(applyFilters());
+
+          // Wire up search
+          var searchEl = document.querySelector('.search-input');
+          if (searchEl) {
+            searchEl.addEventListener('input', function(){
+              render(applyFilters());
+            });
+          }
+
+          // Wire up sort (toggle A-Z / Z-A by title)
+          var sortBtn = document.querySelector('.sort-btn');
+          if (sortBtn) {
+            sortBtn.addEventListener('click', function(){
+              sortAsc = !sortAsc;
+              render(applyFilters());
+            });
+          }
+
+          // Wire up filter (category) - build a small dropdown dynamically
+          var filterBtn = document.querySelector('.filter-btn');
+          if (filterBtn) {
+            var container = document.querySelector('.filter-sort');
+            var select = document.createElement('select');
+            select.className = 'form-select';
+            select.style.maxWidth = '180px';
+            select.style.display = 'none';
+            var optAll = document.createElement('option'); optAll.value = ''; optAll.textContent = 'All Categories'; select.appendChild(optAll);
+            var cats = Array.from(new Set(allItems.map(function(it){ return it.category || ''; }).filter(Boolean)));
+            cats.forEach(function(c){ var o = document.createElement('option'); o.value = c; o.textContent = c; select.appendChild(o); });
+            container.insertBefore(select, container.firstChild);
+
+            filterBtn.addEventListener('click', function(){
+              select.style.display = (select.style.display === 'none') ? 'block' : 'none';
+            });
+            select.addEventListener('change', function(){
+              currentCategory = select.value || '';
+              render(applyFilters());
+            });
+          }
         })
         .catch(function(){});
     })();
@@ -286,9 +358,7 @@
           
           // Reset apply button
           var applyBtn = document.getElementById('applyBtn');
-          applyBtn.textContent = 'APPLY';
-          applyBtn.disabled = false;
-          applyBtn.onclick = function() { submitApplication(currentScholarshipId); };
+          if (applyBtn) { applyBtn.style.display = 'none'; }
           
           // Show modal
           var modal = new bootstrap.Modal(document.getElementById('scholarshipModal'));

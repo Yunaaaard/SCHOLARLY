@@ -248,9 +248,7 @@ function showScholarshipDetails(scholarshipId) {
         data.email || data.phone || "N/A";
 
       const applyBtn = document.getElementById("applyBtn");
-      applyBtn.textContent = "APPLY";
-      applyBtn.disabled = false;
-      applyBtn.onclick = () => submitApplication(scholarshipId);
+      if (applyBtn) { applyBtn.style.display = "none"; }
 
       new bootstrap.Modal(document.getElementById("scholarshipModal")).show();
     })
@@ -261,32 +259,7 @@ function showScholarshipDetails(scholarshipId) {
 }
 
 // ✅ Submit application
-function submitApplication(scholarshipId) {
-  const applyBtn = document.getElementById("applyBtn");
-  applyBtn.disabled = true;
-  applyBtn.textContent = "APPLYING...";
-
-  const fd = new FormData();
-  fd.append("scholarship_id", scholarshipId);
-
-  fetch("api-applications.php", { method: "POST", body: fd, credentials: "same-origin" })
-    .then(r => r.json())
-    .then(data => {
-      if (data.success) {
-        applyBtn.textContent = "APPLIED ✓";
-        applyBtn.style.backgroundColor = "#28a745";
-      } else {
-        applyBtn.textContent = "APPLY";
-        applyBtn.disabled = false;
-        alert(data.error || "Failed to submit application");
-      }
-    })
-    .catch(() => {
-      applyBtn.textContent = "APPLY";
-      applyBtn.disabled = false;
-      alert("Network error");
-    });
-}
+function submitApplication() { /* disabled */ }
 </script>
 </body>
 </html>
