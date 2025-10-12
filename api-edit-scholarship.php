@@ -40,8 +40,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         http_response_code(404);
         echo json_encode(['error' => 'Scholarship not found']);
     }
+    
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Update scholarship
+    // Check for delete action first
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'delete') {
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Invalid scholarship ID']);
+            exit();
+        }
+
+        $stmt = $conn->prepare("DELETE FROM scholarships WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $success = $stmt->execute();
+        $stmt->close();
+
+        echo json_encode(['success' => $success]);
+        exit();
+    }
+
+    // Otherwise, this is an update request
     $scholarshipId = (int) ($_POST['id'] ?? 0);
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -56,8 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($scholarshipId <= 0) { $errors[] = 'Invalid scholarship ID.'; }
     if ($title === '') { $errors[] = 'Scholarship title is required.'; }
     if ($description === '') { $errors[] = 'Description is required.'; }
-    if ($sponsor === '') { $errors[] = 'Sponsor is required.'; }
-    if (!in_array($category, ['Company','School','Organization'], true)) { $errors[] = 'Category is required.'; }
+    if (!in_array($category, ['Company','School','Organization','Government','Foundation','Non-Profit','Individual','Other'], true)) { $errors[] = 'Category is required.'; }
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Invalid email format.'; }
     if ($start_date && $end_date && strtotime($end_date) < strtotime($start_date)) { $errors[] = 'End date cannot be before start date.'; }
     
@@ -84,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
         }
     }
-    
+
     if (!empty($errors)) {
         echo json_encode(['success' => false, 'errors' => $errors]);
         exit();
@@ -92,11 +111,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
     // Update scholarship
     if ($imagePath) {
-        $sql = "UPDATE scholarships SET title = ?, description = ?, sponsor = ?, category = ?, start_date = ?, end_date = ?, phone = ?, email = ?, image_path = ? WHERE id = ?";
+        $sql = "UPDATE scholarships 
+                SET title = ?, description = ?, sponsor = ?, category = ?, start_date = ?, end_date = ?, phone = ?, email = ?, image_path = ?
+                WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('sssssssssi', $title, $description, $sponsor, $category, $start_date, $end_date, $phone, $email, $imagePath, $scholarshipId);
     } else {
-        $sql = "UPDATE scholarships SET title = ?, description = ?, sponsor = ?, category = ?, start_date = ?, end_date = ?, phone = ?, email = ? WHERE id = ?";
+        $sql = "UPDATE scholarships 
+                SET title = ?, description = ?, sponsor = ?, category = ?, start_date = ?, end_date = ?, phone = ?, email = ?
+                WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('ssssssssi', $title, $description, $sponsor, $category, $start_date, $end_date, $phone, $email, $scholarshipId);
     }

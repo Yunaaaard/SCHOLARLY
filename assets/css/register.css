@@ -1,109 +1,144 @@
- body, html {
-      height: 100%;
-      font-family: 'Poppins', sans-serif;
-    }
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f6f7fb;
+}
 
-    .left {
-      background-color: #b3a6d8; /* Light purple */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+/* LEFT SIDE */
+.left {
+  background-color: #B5A6E8;
+  color: #fff;
+  height: 100vh;
+}
 
-    .logo-text {
-      font-size: 60px;
-      font-weight: 700;
-      color: #fff;
-    }
+.logo-section .cap-icon {
+  width: 80px;
+  margin-bottom: 10px;
+}
 
-    .logo-text span {
-      color: #9f8bd8; /* lighter purple for ARLY */
-    }
+.logo-text {
+  font-size: 70px;
+  font-weight: 700;
+  color: #F5F3FF;
+  letter-spacing: 1.5px;
+}
+.logo-text span {
+  color: #EAE3FF;
+}
 
-    .right {
-      background-color: #f4f4fc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+/* RIGHT SIDE */
+.right {
+  background-color: #ffffff;
+  height: 100vh;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.05);
+}
 
-    .signup-form {
-      width: 80%;
-    }
+.signup-form {
+  width: 100%;
+  max-width: 370px;
+  background: #fff;
+  padding: 35px 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
 
-    .form-control {
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border: none;
-      padding: 12px;
-      font-size: 14px;
-    }
+.input-group-text {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-right: none;
+  color: #999;
+  border-radius: 10px 0 0 10px;
+  padding: 10px 14px;
+}
 
-    .form-check {
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
+.form-control {
+  border: 1px solid #ddd;
+  border-radius: 0 10px 10px 0;
+  font-size: 14px;
+  padding: 12px;
+  box-shadow: none;
+  transition: 0.2s;
+}
+.form-control:focus {
+  border-color: #a08ff0;
+  box-shadow: 0 0 4px rgba(160, 143, 240, 0.4);
+}
 
-    .btn-signin {
-      color: #fff;
-      background-color: #8b75d7;
-      border-radius: 20px;
-      font-weight: 600;
-      border: none;
-      padding: 12px;
-      width: 100%;
-    }
+.toggle-eye {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a08ff0;
+  cursor: pointer;
+}
 
-    .btn-signin:hover {
-      background-color: #735dc0;
-    }
+/* Checkbox */
+.form-check-label a {
+  color: #7C66C9;
+  text-decoration: none;
+  font-weight: 500;
+}
+.form-check-label a:hover {
+  text-decoration: underline;
+}
 
-    .divider {
-      text-align: center;
-      margin: 20px 0;
-      position: relative;
-    }
+/* Buttons */
+.btn-signup {
+  width: 100%;
+  background-color: #7C66C9;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 12px;
+  margin-top: 10px;
+  box-shadow: 0 4px 10px rgba(124, 102, 201, 0.3);
+  transition: 0.2s;
+}
+.btn-signup:hover {
+  background-color: #6b55b8;
+}
 
-    .divider span {
-      background: #f4f4fc;
-      padding: 0 10px;
-      position: relative;
-      z-index: 2;
-      font-size: 14px;
-    }
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 25px 0;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #ccc;
+}
+.divider span {
+  padding: 0 10px;
+  color: #666;
+  font-weight: 600;
+  font-size: 13px;
+}
 
-    .divider::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 1px;
-      background: #ccc;
-      z-index: 1;
-    }
+/* Text links */
+.signup-text {
+  font-size: 13px;
+  color: #444;
+}
+.signup-text a {
+  color: #7C66C9;
+  text-decoration: none;
+  font-weight: 600;
+}
+.signup-text a:hover { text-decoration: underline; }
 
-    .signup-text {
-      font-size: 14px;
-      margin-top: 10px;
-    }
-
-    .social-login a img {
-      width: 36px;
-      height: 36px;
-      margin: 0 10px;
-    }
-     .forgot-password {
-      text-align: right;
-      margin-top: 8px;
-    }
-
-    .forgot-password a {
-      font-size: 14px;
-      color: #8b75d7;
-      text-decoration: none;
-    }
-
-    .forgot-password a:hover {
-      text-decoration: underline;
-    }
+/* Social icons */
+.social-login a {
+  display: inline-block;
+  margin: 0 8px;
+}
+.social-login img {
+  width: 32px;
+  height: 32px;
+}

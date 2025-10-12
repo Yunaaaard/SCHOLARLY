@@ -22,12 +22,45 @@ $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture VARCHAR
 $userId = (int) $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $action = $_POST['action'] ?? '';
   $username = trim($_POST['username'] ?? '');
   $email = trim($_POST['email'] ?? '');
   $contact = trim($_POST['contact'] ?? '');
+  $password = trim($_POST['password'] ?? '');
   $profilePicture = null;
 
   $errors = [];
+  
+  // Handle password-only change
+  if ($action === 'change_password') {
+    if ($password === '') {
+      $errors[] = 'Password is required.';
+    } elseif (strlen($password) < 6) {
+      $errors[] = 'Password must be at least 6 characters long.';
+    }
+    
+    if (empty($errors)) {
+      $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+      $stmt = $conn->prepare('UPDATE users SET password = ? WHERE id = ?');
+      $stmt->bind_param('si', $hashedPassword, $userId);
+      
+      if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Password updated successfully']);
+      } else {
+        echo json_encode(['success' => false, 'error' => 'Failed to update password']);
+      }
+      $stmt->close();
+      $conn->close();
+      exit();
+    } else {
+      http_response_code(422);
+      echo json_encode(['success' => false, 'error' => implode("\n", $errors)]);
+      $conn->close();
+      exit();
+    }
+  }
+  
+  // Handle profile update
   if ($username === '') { $errors[] = 'Username is required.'; }
   if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Valid email is required.'; }
   if ($contact === '') { $errors[] = 'Contact is required.'; }
@@ -65,13 +98,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
   }
 
-  // Update profile with or without new picture
-  if ($profilePicture) {
-    $stmt = $conn->prepare('UPDATE users SET username = ?, email = ?, contact = ?, profile_picture = ? WHERE id = ?');
-    $stmt->bind_param('ssssi', $username, $email, $contact, $profilePicture, $userId);
+  // Update profile with or without new picture and password
+  if ($password !== '') {
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    if ($profilePicture) {
+      $stmt = $conn->prepare('UPDATE users SET username = ?, email = ?, contact = ?, password = ?, profile_picture = ? WHERE id = ?');
+      $stmt->bind_param('sssssi', $username, $email, $contact, $hashedPassword, $profilePicture, $userId);
+    } else {
+      $stmt = $conn->prepare('UPDATE users SET username = ?, email = ?, contact = ?, password = ? WHERE id = ?');
+      $stmt->bind_param('ssssi', $username, $email, $contact, $hashedPassword, $userId);
+    }
   } else {
-    $stmt = $conn->prepare('UPDATE users SET username = ?, email = ?, contact = ? WHERE id = ?');
-    $stmt->bind_param('sssi', $username, $email, $contact, $userId);
+    if ($profilePicture) {
+      $stmt = $conn->prepare('UPDATE users SET username = ?, email = ?, contact = ?, profile_picture = ? WHERE id = ?');
+      $stmt->bind_param('ssssi', $username, $email, $contact, $profilePicture, $userId);
+    } else {
+      $stmt = $conn->prepare('UPDATE users SET username = ?, email = ?, contact = ? WHERE id = ?');
+      $stmt->bind_param('sssi', $username, $email, $contact, $userId);
+    }
   }
   
   if ($stmt->execute()) {

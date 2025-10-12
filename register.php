@@ -5,10 +5,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+session_start(); // Start session for auto login
+
 // Include database configuration
 require_once 'config.php';
 
-// Connect to MySQL (XAMPP)
+// Connect to MySQL
 $conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD);
 if ($conn->connect_error) {
     die('Connection failed: ' . $conn->connect_error);
@@ -23,14 +25,11 @@ $createTableSql = "CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    contact VARCHAR(20) NOT NULL,
+    contact VARCHAR(30) NOT NULL,
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 $conn->query($createTableSql);
-
-// Ensure contact column is large enough (some UIs include country code/spaces)
-@$conn->query("ALTER TABLE users MODIFY contact VARCHAR(30) NOT NULL");
 
 // Get and validate form values
 $username = trim($_POST['username'] ?? '');
@@ -38,10 +37,11 @@ $email = trim($_POST['email'] ?? '');
 $contact = trim($_POST['contact'] ?? '');
 $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
+$termsAccepted = isset($_POST['terms']);
 
-// Validation
 $errors = [];
 
+// Validation
 if (empty($username)) {
     $errors[] = "Username is required.";
 } elseif (strlen($username) < 3) {
@@ -68,6 +68,10 @@ if (empty($password)) {
 
 if ($password !== $confirm_password) {
     $errors[] = "Passwords do not match.";
+}
+
+if (!$termsAccepted) {
+    $errors[] = "You must agree to the Terms and Conditions before registering.";
 }
 
 // If there are validation errors, show them
@@ -100,15 +104,20 @@ $checkStmt->close();
 // Hash the password for security
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-// Insert new user into database
+// Insert new user
 $insertSql = "INSERT INTO users (username, email, contact, password) VALUES (?, ?, ?, ?)";
 $insertStmt = $conn->prepare($insertSql);
 $insertStmt->bind_param('ssss', $username, $email, $contact, $hashed_password);
 
 if ($insertStmt->execute()) {
+    // Automatically log in the user
+    $_SESSION['user_id'] = $insertStmt->insert_id;
+    $_SESSION['username'] = $username;
+    $_SESSION['email'] = $email;
+
     echo "<script>
-        alert('Registration successful! Please log in.');
-        window.location.href = 'login.html';
+        alert('Registration successful! Redirecting to your dashboard...');
+        window.location.href = 'dashboard.php';
     </script>";
 } else {
     echo "<script>

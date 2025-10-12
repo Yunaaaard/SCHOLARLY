@@ -8,6 +8,8 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
     rel="stylesheet">
   <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
     .settings-section {
       margin-bottom: 2rem;
@@ -26,30 +28,52 @@
 <body>
   <div class="dashboard d-flex">
     <aside class="sidebar d-flex flex-column align-items-center p-3">
-      <img src="assets/images/Group 44.png" alt="Scholarly Logo" class="logo mb-4">
-      <div class="profile text-center mb-4">
-        <img src="assets/Images/profile.png" alt="Profile" class="profile-img mb-2">
-        <h2 id="sidebarName" class="h5 fw-bold">Leonard Tariman</h2>
-        <p class="small mb-2">STUDENT</p>
-        <button class="btn btn-primary rounded-pill">Edit Profile</button>
-      </div>
-      <hr class="w-100">
+  <img src="assets/images/Group 44.png" alt="Scholarly Logo" class="logo mb-4 sidebar-logo">
+  
+  <div class="profile text-center mb-4">
+    <img src="assets/Images/profile.png" alt="Profile" class="profile-img mb-2 big-circle">
+    <h2 id="sidebarName" class="h5 fw-bold">Leonard Tariman</h2>
+    <p class="small mb-2">STUDENT</p>
+    <button class="btn btn-primary rounded-pill" onclick="window.location.href='edit.html'">Edit Profile</button>
+  </div>
 
-      <nav class="nav flex-column w-100">
-        <a href="dashboard.html" class="nav-link d-flex align-items-center gap-2 text-white">
-          <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/ypvgcziq_expires_30_days.png"> Home
-        </a>
-        <a href="settings.html" class="nav-link d-flex align-items-center gap-2 text-white active">
-          <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/xqldtbo1_expires_30_days.png"> Settings
-        </a>
-        <a href="bookmark.html" class="nav-link d-flex align-items-center gap-2 text-white">
-          <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/ed6vfccw_expires_30_days.png"> Bookmarks
-        </a>
-        <a href="index.html" class="nav-link d-flex align-items-center gap-2 text-white">
-          <img src="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/P11DPD00iM/2y4kk645_expires_30_days.png"> Logout
-        </a>
-      </nav>
-    </aside>
+  <hr class="w-100">
+
+  <nav class="nav flex-column w-100">
+  <a href="dashboard.html" class="nav-link d-flex align-items-center gap-2 text-white">
+    <i class="bi bi-house-door"></i> Home
+  </a>
+  <a href="settings.html" class="nav-link d-flex align-items-center gap-2 text-white">
+    <i class="bi bi-gear"></i> Settings
+  </a>
+  <a href="bookmark.html" class="nav-link d-flex align-items-center gap-2 text-white">
+    <i class="bi bi-bookmark"></i> Bookmarks
+  </a>
+  <a href="logout.php" class="nav-link d-flex align-items-center gap-2 text-white" 
+   data-bs-toggle="modal" data-bs-target="#logoutModal">
+  <i class="bi bi-box-arrow-right"></i> Logout
+</a>
+</nav>
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content logout-modal">
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-box-arrow-right text-danger mb-3" style="font-size:3rem;"></i>
+        <h5 class="fw-bold text-dark mb-2">Are you sure you want to log out?</h5>
+        <p class="text-muted small">You will be redirected to the login page.</p>
+        <div class="d-flex justify-content-center gap-3 mt-3">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a href="logout.php" class="btn btn-danger px-4">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Custom toggle button with arrow image -->
+  <button class="sidebar-toggle" id="sidebarToggle">
+  <img src="assets/Images/left_arrow.png" alt="Toggle Sidebar" class="arrow-icon">
+</button>
+</aside>
     <main class="main-content flex-grow-1 p-4">
       <h2 class="fw-bold mb-4">Settings</h2>
       <div class="settings-container">
@@ -75,16 +99,12 @@
           <h5>Change Password</h5>
           <form id="passwordForm">
             <div class="mb-3">
-              <label class="form-label">Current Password</label>
-              <input type="password" class="form-control">
-            </div>
-            <div class="mb-3">
               <label class="form-label">New Password</label>
-              <input type="password" class="form-control">
+              <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
             </div>
             <div class="mb-3">
               <label class="form-label">Confirm New Password</label>
-              <input type="password" class="form-control">
+              <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
             </div>
             <button type="submit" class="btn btn-primary">Update Password</button>
           </form>
@@ -166,6 +186,102 @@
         });
       }
     });
+
+    // Password change functionality
+    var passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        var newPassword = document.getElementById('newPassword').value.trim();
+        var confirmPassword = document.getElementById('confirmPassword').value.trim();
+        
+        if (newPassword === '') {
+          showPasswordAlert('Please enter a new password.', 'danger');
+          return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+          showPasswordAlert('Passwords do not match.', 'danger');
+          return;
+        }
+        
+        if (newPassword.length < 6) {
+          showPasswordAlert('Password must be at least 6 characters long.', 'danger');
+          return;
+        }
+        
+        var fd = new FormData();
+        fd.append('password', newPassword);
+        fd.append('username', document.getElementById('setUsername').value.trim());
+        fd.append('email', document.getElementById('setEmail').value.trim());
+        fd.append('contact', document.getElementById('setContact').value.trim());
+        fd.append('action', 'change_password');
+        
+        fetch('api-user-profile.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: fd
+        }).then(function(r){
+          return r.json().then(function(j){ return { ok: r.ok, status: r.status, body: j }; });
+        }).then(function(res){
+          if (res.ok && res.body.success) {
+            showPasswordAlert('Password updated successfully.', 'success');
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+          } else {
+            showPasswordAlert(res.body && res.body.error ? res.body.error : 'Password update failed', 'danger');
+          }
+        }).catch(function(error){
+          console.error('Password change error:', error);
+          showPasswordAlert('Network error. Please try again.', 'danger');
+        });
+      });
+    }
+    
+    function showPasswordAlert(message, type) {
+      var oldAlert = document.querySelector('#passwordForm .alert');
+      if (oldAlert) oldAlert.remove();
+      
+      var alertDiv = document.createElement('div');
+      alertDiv.className = 'alert mt-3 alert-' + type;
+      alertDiv.textContent = message;
+      passwordForm.appendChild(alertDiv);
+      setTimeout(function(){ alertDiv.remove(); }, 3000);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+  const sidebar = document.querySelector(".sidebar");
+  const toggleButton = document.getElementById("sidebarToggle");
+  const profileImg = document.querySelector(".profile-img");
+
+  toggleButton.addEventListener("click", function() {
+    sidebar.classList.toggle("collapsed");
+
+    // make profile picture smaller when collapsed
+    if (sidebar.classList.contains("collapsed")) {
+      profileImg.classList.add("small-profile");
+    } else {
+      profileImg.classList.remove("small-profile");
+    }
+  });
+});
+
+ toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+  });
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const currentPage = window.location.pathname.split("/").pop();
+    const navLinks = document.querySelectorAll(".sidebar .nav-link");
+    navLinks.forEach(link => {
+      const href = link.getAttribute("href").split("/").pop();
+      if (href === currentPage) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+  });
   </script>
 </body>
 </html>

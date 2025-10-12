@@ -83,11 +83,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   
   if ($scholarshipId > 0) {
     try {
-      $sql = "SELECT a.*, u.username, u.email, u.contact 
-              FROM applications a 
-              LEFT JOIN users u ON a.user_id = u.id 
-              WHERE a.scholarship_id = ? 
-              ORDER BY a.applied_at DESC";
+      // Ensure bookmarks table exists
+      $conn->query("CREATE TABLE IF NOT EXISTS bookmarks (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        user_id INT UNSIGNED NOT NULL,
+        scholarship_id INT UNSIGNED NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_user_scholarship (user_id, scholarship_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+      
+      $sql = "SELECT b.*, u.username, u.email, u.contact 
+              FROM bookmarks b 
+              LEFT JOIN users u ON b.user_id = u.id 
+              WHERE b.scholarship_id = ? 
+              ORDER BY b.created_at DESC";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param('i', $scholarshipId);
       $stmt->execute();
@@ -104,6 +113,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($row['contact'])) {
           $row['contact'] = 'N/A';
         }
+        // Rename fields to match expected format
+        $row['applied_at'] = $row['created_at'];
+        $row['status'] = 'bookmarked';
         $applications[] = $row;
       }
       
