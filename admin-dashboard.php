@@ -19,7 +19,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS scholarships (
   title VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   sponsor VARCHAR(255) NOT NULL,
-  category ENUM('Company','School','Organization') NOT NULL,
+  category ENUM('Company','School','Organization','Government','Foundation','Non-Profit','Individual','Other') NOT NULL,
   start_date DATE NULL,
   end_date DATE NULL,
   phone VARCHAR(30) NULL,
@@ -70,9 +70,9 @@ $category = trim($_GET['category'] ?? '');
 $sort = trim($_GET['sort'] ?? '');
 
 $baseSql = "SELECT s.id, s.title, s.sponsor, s.category, s.start_date, s.end_date, s.image_path,
-                   COUNT(a.id) as application_count
+                   COUNT(b.id) as application_count
             FROM scholarships s
-            LEFT JOIN applications a ON s.id = a.scholarship_id";
+            LEFT JOIN bookmarks b ON s.id = b.scholarship_id";
 
 $where = [];
 $bindTypes = '';
@@ -126,6 +126,59 @@ if ($bindTypes !== '') {
   <style>
     body {
       font-family: 'Poppins', sans-serif !important;
+    }
+    
+    /* Rich text editor styles */
+    .rich-text-editor {
+      background: white;
+      border: 1px solid #ced4da;
+      border-radius: 0.375rem;
+    }
+    
+    .rich-text-editor:focus-within {
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .toolbar button {
+      border: 1px solid #dee2e6;
+      background: white;
+    }
+    
+    .toolbar button:hover {
+      background: #f8f9fa;
+    }
+    
+    .description-content {
+      font-family: inherit;
+      line-height: 1.5;
+    }
+    
+    .description-content:empty:before {
+      content: attr(data-placeholder);
+      color: #6c757d;
+      font-style: italic;
+    }
+    
+    .description-content ul, .description-content ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    
+    .description-content p {
+      margin: 0.5rem 0;
+    }
+    
+    .description-content strong {
+      font-weight: bold;
+    }
+    
+    .description-content em {
+      font-style: italic;
+    }
+    
+    .description-content u {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -198,8 +251,8 @@ if ($bindTypes !== '') {
                 </div>
               </div>
               <div class="d-flex gap-2 align-items-center">
-                <span class="badge bg-primary"><?php echo $s['application_count']; ?> applications</span>
-                <button class="btn btn-sm btn-outline-primary" onclick="viewApplications(<?php echo $s['id']; ?>)">View Applications</button>
+                <span class="badge bg-primary"><?php echo $s['application_count']; ?> bookmarks</span>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewApplications(<?php echo $s['id']; ?>)">View Bookmarks</button>
                 <button class="btn btn-sm btn-outline-success" onclick="editScholarship(<?php echo $s['id']; ?>)">Edit</button>
               </div>
             </div>
@@ -250,12 +303,35 @@ if ($bindTypes !== '') {
               </div>
               <div class="col-md-6 mb-3">
                 <label for="editSponsor" class="form-label">Sponsor</label>
-                <input type="text" class="form-control" id="editSponsor" name="sponsor" required>
+                <input type="text" class="form-control" id="editSponsor" name="sponsor">
               </div>
             </div>
             <div class="mb-3">
               <label for="editDescription" class="form-label">Description</label>
-              <textarea class="form-control" id="editDescription" name="description" rows="3" required></textarea>
+              <div class="rich-text-editor border rounded p-2" style="min-height: 200px; background: white;">
+                <div class="toolbar mb-2 border-bottom pb-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatTextEdit('bold')" title="Bold">
+                    <i class="bi bi-type-bold"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatTextEdit('italic')" title="Italic">
+                    <i class="bi bi-type-italic"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatTextEdit('underline')" title="Underline">
+                    <i class="bi bi-type-underline"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertLineBreakEdit()" title="Line Break">
+                    <i class="bi bi-text-paragraph"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertBulletListEdit()" title="Bullet List">
+                    <i class="bi bi-list-ul"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertNumberedListEdit()" title="Numbered List">
+                    <i class="bi bi-list-ol"></i>
+                  </button>
+                </div>
+                <div contenteditable="true" id="editDescriptionEditor" class="description-content" style="min-height: 150px; outline: none;" data-placeholder="Provide a detailed description with formatting..."></div>
+              </div>
+              <textarea id="editDescription" name="description" style="display: none;" required></textarea>
             </div>
             <div class="row">
               <div class="col-md-4 mb-3">
@@ -265,6 +341,11 @@ if ($bindTypes !== '') {
                   <option value="Company">Company</option>
                   <option value="School">School</option>
                   <option value="Organization">Organization</option>
+                  <option value="Government">Government</option>
+                  <option value="Foundation">Foundation</option>
+                  <option value="Non-Profit">Non-Profit</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <div class="col-md-4 mb-3">
@@ -328,12 +409,12 @@ if ($bindTypes !== '') {
           var container = document.getElementById('applicationsList');
           
           if (!applications || applications.length === 0) {
-            container.innerHTML = '<div class="alert alert-info">No applications found for this scholarship.</div>';
+            container.innerHTML = '<div class="alert alert-info">No bookmarks found for this scholarship.</div>';
             return;
           }
           
           var html = '<div class="table-responsive"><table class="table table-striped">';
-          html += '<thead><tr><th>Name</th><th>Email</th><th>Contact</th><th>Applied Date</th><th>Status</th><th>Actions</th></tr></thead>';
+          html += '<thead><tr><th>Name</th><th>Email</th><th>Contact</th><th>Bookmarked Date</th><th>Status</th><th>Actions</th></tr></thead>';
           html += '<tbody>';
           
           applications.forEach(function(app) {
@@ -342,22 +423,10 @@ if ($bindTypes !== '') {
             html += '<td>' + (app.email || 'N/A') + '</td>';
             html += '<td>' + (app.contact || 'N/A') + '</td>';
             html += '<td>' + new Date(app.applied_at).toLocaleDateString() + '</td>';
-            html += '<td><span class="badge bg-' + (app.status === 'pending' ? 'warning' : app.status === 'approved' ? 'success' : 'danger') + '">' + app.status + '</span></td>';
+            html += '<td><span class="badge bg-info">' + app.status + '</span></td>';
             html += '<td>';
-            if (app.status === 'pending') {
-  html += `
-    <div class="d-flex justify-content-center gap-2">
-      <button class="btn btn-success btn-sm flex-fill" onclick="updateApplicationStatus(${app.id}, 'approved')">
-        <i class="bi bi-check-circle"></i> Approve
-      </button>
-      <button class="btn btn-danger btn-sm flex-fill" onclick="updateApplicationStatus(${app.id}, 'rejected')">
-        <i class="bi bi-x-circle"></i> Reject
-      </button>
-    </div>
-  `;
-} else {
-  html += '<span class="text-muted">No actions</span>';
-}
+            // No actions needed for bookmarks
+            html += '<span class="text-muted">-</span>';
             html += '</td>';
             html += '</tr>';
           });
@@ -444,6 +513,7 @@ document.getElementById('deleteScholarshipBtn').addEventListener('click', functi
           document.getElementById('editScholarshipId').value = scholarship.id;
           document.getElementById('editTitle').value = scholarship.title || '';
           document.getElementById('editSponsor').value = scholarship.sponsor || '';
+          document.getElementById('editDescriptionEditor').innerHTML = scholarship.description || '';
           document.getElementById('editDescription').value = scholarship.description || '';
           document.getElementById('editCategory').value = scholarship.category || '';
           document.getElementById('editStartDate').value = scholarship.start_date || '';
@@ -459,8 +529,56 @@ document.getElementById('deleteScholarshipBtn').addEventListener('click', functi
         });
     }
 
+    // Rich text editor functions for edit modal
+    function formatTextEdit(command) {
+      document.execCommand(command, false, null);
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
+    function insertLineBreakEdit() {
+      document.execCommand('insertHTML', false, '<br><br>');
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
+    function insertBulletListEdit() {
+      document.execCommand('insertUnorderedList', false, null);
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
+    function insertNumberedListEdit() {
+      document.execCommand('insertOrderedList', false, null);
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
+    // Sync edit editor content with hidden textarea
+    function syncEditDescription() {
+      const editor = document.getElementById('editDescriptionEditor');
+      const textarea = document.getElementById('editDescription');
+      textarea.value = editor.innerHTML;
+    }
+
+    // Initialize edit editor
+    document.addEventListener('DOMContentLoaded', function() {
+      const editor = document.getElementById('editDescriptionEditor');
+      const textarea = document.getElementById('editDescription');
+      
+      if (editor) {
+        editor.addEventListener('input', function() {
+          syncEditDescription();
+        });
+
+        // Sync on form submit
+        document.getElementById('editScholarshipForm').addEventListener('submit', function() {
+          syncEditDescription();
+        });
+      }
+    });
+
     document.getElementById('editScholarshipForm').addEventListener('submit', function(e) {
       e.preventDefault();
+      
+      // Sync editor content before submit
+      syncEditDescription();
       
       var formData = new FormData(this);
       

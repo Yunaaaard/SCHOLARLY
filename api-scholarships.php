@@ -39,12 +39,12 @@ if (isset($_GET['id'])) {
 
 // Handle list request
 $q = trim($_GET['q'] ?? '');
-$sql = "SELECT id, title, sponsor, image_path FROM scholarships";
+$sql = "SELECT id, title, sponsor, category, image_path FROM scholarships";
 if ($q !== '') {
-  $sql .= " WHERE title LIKE ? OR sponsor LIKE ?";
+  $sql .= " WHERE title LIKE ? OR sponsor LIKE ? OR category LIKE ?";
   $stmt = $conn->prepare($sql);
   $like = "%$q%";
-  $stmt->bind_param('ss', $like, $like);
+  $stmt->bind_param('sss', $like, $like, $like);
   $stmt->execute();
   $res = $stmt->get_result();
 } else {

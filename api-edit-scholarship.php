@@ -76,8 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($scholarshipId <= 0) { $errors[] = 'Invalid scholarship ID.'; }
     if ($title === '') { $errors[] = 'Scholarship title is required.'; }
     if ($description === '') { $errors[] = 'Description is required.'; }
-    if ($sponsor === '') { $errors[] = 'Sponsor is required.'; }
-    if (!in_array($category, ['Company','School','Organization'], true)) { $errors[] = 'Category is required.'; }
+    if (!in_array($category, ['Company','School','Organization','Government','Foundation','Non-Profit','Individual','Other'], true)) { $errors[] = 'Category is required.'; }
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Invalid email format.'; }
     if ($start_date && $end_date && strtotime($end_date) < strtotime($start_date)) { $errors[] = 'End date cannot be before start date.'; }
     

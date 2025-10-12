@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           title VARCHAR(255) NOT NULL,
           description TEXT NOT NULL,
           sponsor VARCHAR(255) NOT NULL,
-          category ENUM('Company','School','Organization') NOT NULL,
+          category ENUM('Company','School','Organization','Government','Foundation','Non-Profit','Individual','Other') NOT NULL,
           start_date DATE NULL,
           end_date DATE NULL,
           phone VARCHAR(30) NULL,
@@ -43,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($title === '') { $errors[] = 'Scholarship title is required.'; }
         if ($description === '') { $errors[] = 'Description is required.'; }
-        if ($sponsor === '') { $errors[] = 'Sponsor is required.'; }
-        if (!in_array($category, ['Company','School','Organization'], true)) { $errors[] = 'Category is required.'; }
+        if (!in_array($category, ['Company','School','Organization','Government','Foundation','Non-Profit','Individual','Other'], true)) { $errors[] = 'Category is required.'; }
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Invalid email format.'; }
         if ($start_date && $end_date && strtotime($end_date) < strtotime($start_date)) { $errors[] = 'End date cannot be before start date.'; }
 
@@ -124,6 +123,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .check-tick { stroke:#28a745; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; fill:none; stroke-dasharray:60; stroke-dashoffset:60; animation:drawTick .35s .35s ease forwards; }
     @keyframes drawCircle { to { stroke-dashoffset:0; } }
     @keyframes drawTick { to { stroke-dashoffset:0; } }
+    
+    /* Rich text editor styles */
+    .rich-text-editor {
+      background: white;
+      border: 1px solid #ced4da;
+      border-radius: 0.375rem;
+    }
+    
+    .rich-text-editor:focus-within {
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .toolbar button {
+      border: 1px solid #dee2e6;
+      background: white;
+    }
+    
+    .toolbar button:hover {
+      background: #f8f9fa;
+    }
+    
+    .description-content {
+      font-family: inherit;
+      line-height: 1.5;
+    }
+    
+    .description-content:empty:before {
+      content: attr(data-placeholder);
+      color: #6c757d;
+      font-style: italic;
+    }
+    
+    .description-content ul, .description-content ol {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    
+    .description-content p {
+      margin: 0.5rem 0;
+    }
+    
+    .description-content strong {
+      font-weight: bold;
+    }
+    
+    .description-content em {
+      font-style: italic;
+    }
+    
+    .description-content u {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -172,26 +224,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="mb-3">
           <label for="description" class="form-label fw-semibold">Description</label>
-          <textarea class="form-control" id="description" name="description" rows="4" placeholder="Provide a detailed description" required></textarea>
+          <div class="rich-text-editor border rounded p-2" style="min-height: 200px; background: white;">
+            <div class="toolbar mb-2 border-bottom pb-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatText('bold')" title="Bold">
+                <i class="bi bi-type-bold"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatText('italic')" title="Italic">
+                <i class="bi bi-type-italic"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatText('underline')" title="Underline">
+                <i class="bi bi-type-underline"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertLineBreak()" title="Line Break">
+                <i class="bi bi-text-paragraph"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertBulletList()" title="Bullet List">
+                <i class="bi bi-list-ul"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertNumberedList()" title="Numbered List">
+                <i class="bi bi-list-ol"></i>
+              </button>
+            </div>
+            <div contenteditable="true" id="descriptionEditor" class="description-content" style="min-height: 150px; outline: none;" data-placeholder="Provide a detailed description with formatting..."></div>
+          </div>
+          <textarea id="description" name="description" style="display: none;" required></textarea>
         </div>
         <div class="mb-3">
           <label for="sponsor" class="form-label fw-semibold">Sponsor</label>
-          <input type="text" class="form-control" id="sponsor" name="sponsor" placeholder="Sponsor or Organization Name" required>
+          <input type="text" class="form-control" id="sponsor" name="sponsor" placeholder="Sponsor or Organization Name (Optional)">
         </div>
 
         <div class="mb-3">
           <span class="form-label fw-semibold d-block mb-1">Category</span>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="category" id="company" value="Company" required>
-            <label class="form-check-label" for="company">Company</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="category" id="school" value="School">
-            <label class="form-check-label" for="school">School</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="category" id="organization" value="Organization">
-            <label class="form-check-label" for="organization">Organization</label>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="company" value="Company" required>
+                <label class="form-check-label" for="company">Company</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="school" value="School">
+                <label class="form-check-label" for="school">School</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="organization" value="Organization">
+                <label class="form-check-label" for="organization">Organization</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="government" value="Government">
+                <label class="form-check-label" for="government">Government</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="foundation" value="Foundation">
+                <label class="form-check-label" for="foundation">Foundation</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="nonprofit" value="Non-Profit">
+                <label class="form-check-label" for="nonprofit">Non-Profit</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="individual" value="Individual">
+                <label class="form-check-label" for="individual">Individual</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="category" id="other" value="Other">
+                <label class="form-check-label" for="other">Other</label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -271,6 +372,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Rich text editor functionality
+    function formatText(command) {
+      document.execCommand(command, false, null);
+      document.getElementById('descriptionEditor').focus();
+    }
+
+    function insertLineBreak() {
+      document.execCommand('insertHTML', false, '<br><br>');
+      document.getElementById('descriptionEditor').focus();
+    }
+
+    function insertBulletList() {
+      document.execCommand('insertUnorderedList', false, null);
+      document.getElementById('descriptionEditor').focus();
+    }
+
+    function insertNumberedList() {
+      document.execCommand('insertOrderedList', false, null);
+      document.getElementById('descriptionEditor').focus();
+    }
+
+    // Sync editor content with hidden textarea
+    function syncDescription() {
+      const editor = document.getElementById('descriptionEditor');
+      const textarea = document.getElementById('description');
+      textarea.value = editor.innerHTML;
+    }
+
+    // Initialize editor
+    document.addEventListener('DOMContentLoaded', function() {
+      const editor = document.getElementById('descriptionEditor');
+      const textarea = document.getElementById('description');
+      
+      // Add placeholder functionality
+      editor.addEventListener('input', function() {
+        syncDescription();
+        if (this.innerHTML.trim() === '') {
+          this.innerHTML = '';
+        }
+      });
+
+      editor.addEventListener('focus', function() {
+        if (this.innerHTML.trim() === '') {
+          this.innerHTML = '';
+        }
+      });
+
+      editor.addEventListener('blur', function() {
+        if (this.innerHTML.trim() === '') {
+          this.innerHTML = '';
+        }
+      });
+
+      // Sync on form submit
+      document.querySelector('form').addEventListener('submit', function() {
+        syncDescription();
+      });
+    });
+
     const imageInput = document.getElementById('imageInput');
     const previewContainer = document.getElementById('previewContainer');
     const previewImage = document.getElementById('previewImage');

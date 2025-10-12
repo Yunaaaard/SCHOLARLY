@@ -99,16 +99,12 @@
           <h5>Change Password</h5>
           <form id="passwordForm">
             <div class="mb-3">
-              <label class="form-label">Current Password</label>
-              <input type="password" class="form-control">
-            </div>
-            <div class="mb-3">
               <label class="form-label">New Password</label>
-              <input type="password" class="form-control">
+              <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
             </div>
             <div class="mb-3">
               <label class="form-label">Confirm New Password</label>
-              <input type="password" class="form-control">
+              <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
             </div>
             <button type="submit" class="btn btn-primary">Update Password</button>
           </form>
@@ -190,6 +186,68 @@
         });
       }
     });
+
+    // Password change functionality
+    var passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        var newPassword = document.getElementById('newPassword').value.trim();
+        var confirmPassword = document.getElementById('confirmPassword').value.trim();
+        
+        if (newPassword === '') {
+          showPasswordAlert('Please enter a new password.', 'danger');
+          return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+          showPasswordAlert('Passwords do not match.', 'danger');
+          return;
+        }
+        
+        if (newPassword.length < 6) {
+          showPasswordAlert('Password must be at least 6 characters long.', 'danger');
+          return;
+        }
+        
+        var fd = new FormData();
+        fd.append('password', newPassword);
+        fd.append('username', document.getElementById('setUsername').value.trim());
+        fd.append('email', document.getElementById('setEmail').value.trim());
+        fd.append('contact', document.getElementById('setContact').value.trim());
+        fd.append('action', 'change_password');
+        
+        fetch('api-user-profile.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: fd
+        }).then(function(r){
+          return r.json().then(function(j){ return { ok: r.ok, status: r.status, body: j }; });
+        }).then(function(res){
+          if (res.ok && res.body.success) {
+            showPasswordAlert('Password updated successfully.', 'success');
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+          } else {
+            showPasswordAlert(res.body && res.body.error ? res.body.error : 'Password update failed', 'danger');
+          }
+        }).catch(function(error){
+          console.error('Password change error:', error);
+          showPasswordAlert('Network error. Please try again.', 'danger');
+        });
+      });
+    }
+    
+    function showPasswordAlert(message, type) {
+      var oldAlert = document.querySelector('#passwordForm .alert');
+      if (oldAlert) oldAlert.remove();
+      
+      var alertDiv = document.createElement('div');
+      alertDiv.className = 'alert mt-3 alert-' + type;
+      alertDiv.textContent = message;
+      passwordForm.appendChild(alertDiv);
+      setTimeout(function(){ alertDiv.remove(); }, 3000);
+    }
 
     document.addEventListener("DOMContentLoaded", function() {
   const sidebar = document.querySelector(".sidebar");
