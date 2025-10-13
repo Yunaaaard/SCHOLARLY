@@ -334,7 +334,7 @@
           eligibilityList.innerHTML = '';
           if (data.description) {
             var li = document.createElement('li');
-            li.textContent = data.description;
+            li.innerHTML = data.description;
             eligibilityList.appendChild(li);
           }
           
