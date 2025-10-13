@@ -184,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <img src="assets/images/Group 44.png" alt="Scholarly Logo" class="logo mb-4">
       <div class="profile text-center mb-4">
         <img src="assets/Images/Admin.png" alt="Profile" class="profile-img mb-2">
-        <h2 class="h5 fw-bold">Fiona Apor</h2>
+        <h2 class="h5 fw-bold">Admin</h2>
         <p class="small mb-2">ADMIN</p>
       </div>
       <hr class="w-100">
