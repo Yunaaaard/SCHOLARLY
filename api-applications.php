@@ -104,15 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       
       $applications = [];
       while ($row = $result->fetch_assoc()) {
-        if (empty($row['username'])) {
-          $row['username'] = 'User ' . $row['user_id'];
-        }
-        if (empty($row['email'])) {
-          $row['email'] = 'user' . $row['user_id'] . '@example.com';
-        }
-        if (empty($row['contact'])) {
-          $row['contact'] = 'N/A';
-        }
+        // Do not fabricate placeholder data; leave missing fields empty so UI can show N/A
+        if (!isset($row['username']) || $row['username'] === null) { $row['username'] = ''; }
+        if (!isset($row['email']) || $row['email'] === null) { $row['email'] = ''; }
+        if (empty($row['contact'])) { $row['contact'] = ''; }
         // Rename fields to match expected format
         $row['applied_at'] = $row['created_at'];
         $row['status'] = 'bookmarked';

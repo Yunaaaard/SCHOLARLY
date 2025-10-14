@@ -38,32 +38,6 @@ $conn->query("CREATE TABLE IF NOT EXISTS applications (
   UNIQUE KEY unique_application (user_id, scholarship_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-$result = $conn->query("SELECT COUNT(*) as count FROM users WHERE id IN (1, 2)");
-$userCount = $result->fetch_assoc()['count'];
-if ($userCount < 2) {
-  $userSql = "INSERT IGNORE INTO users (id, username, email, contact, password) VALUES 
-              (1, 'Jane Smith', 'jane.smith@example.com', '098-765-4321', '$2y$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')";
-  $conn->query($userSql);
-}
-
-$result = $conn->query("SELECT COUNT(*) as count FROM applications");
-$count = $result->fetch_assoc()['count'];
-if ($count == 0) {
-  $result = $conn->query("SELECT id FROM scholarships");
-  if ($result->num_rows > 0) {
-    while ($scholarship = $result->fetch_assoc()) {
-      $scholarshipId = $scholarship['id'];
-      
-      $insertSql = "INSERT IGNORE INTO applications (user_id, scholarship_id, status) VALUES 
-                    (1, ?, 'pending'),
-                    (2, ?, 'pending')";
-      $stmt = $conn->prepare($insertSql);
-      $stmt->bind_param('ii', $scholarshipId, $scholarshipId);
-      $stmt->execute();
-      $stmt->close();
-    }
-  }
-}
 
 $q = trim($_GET['q'] ?? '');
 $category = trim($_GET['category'] ?? '');
