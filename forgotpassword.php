@@ -63,13 +63,13 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';       // Gmail SMTP server
     $mail->SMTPAuth = true;
-    $mail->Username = 'jerald070804@gmail.com';  // your Gmail
-    $mail->Password = 'fxpt alqc vlkv xzub';     // app password (not normal password)
+    $mail->Username = 'scholarlys2@gmail.com';  // your Gmail
+    $mail->Password = 'avuu xpqo qfez qkob';     // app password (not normal password)
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
 
     // Recipients
-    $mail->setFrom('YOUR_EMAIL@gmail.com', 'Scholarly Support');
+    $mail->setFrom('scholarlys2@gmail.com', 'Scholarly Support');
     $mail->addAddress($email);
 
     // Email content
