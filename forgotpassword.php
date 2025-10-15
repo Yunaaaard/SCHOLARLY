@@ -1,7 +1,7 @@
 <?php
+date_default_timezone_set('Asia/Manila');
 require_once 'config.php';
 
-// Connect to MySQL
 $conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 if ($conn->connect_error) {
     die("Database connection failed: " . $conn->connect_error);
@@ -63,8 +63,8 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';       // Gmail SMTP server
     $mail->SMTPAuth = true;
-    $mail->Username = 'scholarlys2@gmail.com';  // your Gmail
-    $mail->Password = 'avuu xpqo qfez qkob';     // app password (not normal password)
+    $mail->Username = 'scholarlys2@gmail.com'; 
+    $mail->Password = 'avuu xpqo qfez qkob';    
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
 

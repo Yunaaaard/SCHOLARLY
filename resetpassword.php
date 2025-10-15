@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Manila');
 require_once 'config.php';
 $conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
@@ -13,35 +14,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newPassword = $_POST['password'] ?? '';
     $confirm = $_POST['confirm_password'] ?? '';
 
+    if (empty($token)) {
+        echo "<script>alert('Missing token. Please try again.'); window.location.href='forgot.html';</script>";
+        exit();
+    }
+
     if ($newPassword !== $confirm) {
         echo "<script>alert('Passwords do not match.'); window.history.back();</script>";
         exit();
     }
 
-    // Check token validity
-    $stmt = $conn->prepare("SELECT user_id FROM password_resets WHERE token = ? AND expires_at > NOW()");
+    // Check token validity (allow 1-hour expiration)
+    $stmt = $conn->prepare("
+        SELECT user_id 
+        FROM password_resets 
+        WHERE token = ? AND expires_at >= NOW()
+        LIMIT 1
+    ");
     $stmt->bind_param("s", $token);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
-        echo "<script>alert('Invalid or expired token.'); window.location.href = 'forgot.html';</script>";
+        echo "<script>alert('Invalid or expired token. Please request a new reset link.'); window.location.href='forgot.html';</script>";
         exit();
     }
 
     $user = $result->fetch_assoc();
     $userId = $user['user_id'];
 
-    // Update password
+    // Hash new password
     $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+
+    // Update user password
     $stmt2 = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
     $stmt2->bind_param("si", $hashed, $userId);
     $stmt2->execute();
 
-    // Delete token
-    $conn->query("DELETE FROM password_resets WHERE token = '$token'");
+    // Delete token (prevent reuse)
+    $stmt3 = $conn->prepare("DELETE FROM password_resets WHERE token = ?");
+    $stmt3->bind_param("s", $token);
+    $stmt3->execute();
 
-    echo "<script>alert('Password reset successful! Please login again.'); window.location.href = 'login.html';</script>";
+    echo "<script>alert('✅ Password reset successful! Please log in again.'); window.location.href = 'login.html';</script>";
     exit();
 }
 ?>
