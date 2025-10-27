@@ -207,6 +207,7 @@
 
               var bookmarkIcon = document.createElement('button');
               bookmarkIcon.className = 'bookmark-icon';
+              if (s.bookmarked) { bookmarkIcon.classList.add('bookmarked'); }
               bookmarkIcon.onclick = function(){ toggleBookmark(s.id, bookmarkIcon); };
 
               var btn = document.createElement('button');
