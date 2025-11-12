@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-// Require admin session
+
 if (empty($_SESSION['is_admin'])) {
     http_response_code(403);
     echo json_encode(['error' => 'Admin access required']);
@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Get scholarship details for editing
+
     $scholarshipId = (int) ($_GET['id'] ?? 0);
     
     if ($scholarshipId <= 0) {
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
     
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check for delete action first
+
     $action = $_POST['action'] ?? '';
 
     if ($action === 'delete') {
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit();
     }
 
-    // Otherwise, this is an update request
+   
     $scholarshipId = (int) ($_POST['id'] ?? 0);
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Invalid email format.'; }
     if ($start_date && $end_date && strtotime($end_date) < strtotime($start_date)) { $errors[] = 'End date cannot be before start date.'; }
     
-    // Handle image upload if provided
+   
     $imagePath = null;
     if (!empty($_FILES['image']['name'])) {
         $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit();
     }
     
-    // Update scholarship
+    
     if ($imagePath) {
         $sql = "UPDATE scholarships 
                 SET title = ?, description = ?, sponsor = ?, category = ?, start_date = ?, end_date = ?, phone = ?, email = ?, image_path = ?

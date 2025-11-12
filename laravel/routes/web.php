@@ -7,7 +7,7 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('index');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

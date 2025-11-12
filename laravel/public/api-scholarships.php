@@ -16,10 +16,9 @@ if ($conn->connect_error) {
   exit();
 }
 
-// Current user (0 if admin-only session)
 $userId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : 0;
 
-// Handle individual scholarship detail request
+
 if (isset($_GET['id'])) {
   $scholarshipId = (int) $_GET['id'];
   if ($userId > 0) {
@@ -49,7 +48,7 @@ if (isset($_GET['id'])) {
   exit();
 }
 
-// Handle list request
+
 $q = trim($_GET['q'] ?? '');
 
 $select = "SELECT s.id, s.title, s.sponsor, s.category, s.image_path";

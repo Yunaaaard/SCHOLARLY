@@ -16,7 +16,7 @@ if ($conn->connect_error) {
   exit();
 }
 
-// Get user's applications with scholarship details
+
 $sql = "SELECT a.*, s.title as scholarship_title, s.sponsor as scholarship_sponsor
         FROM applications a
         JOIN scholarships s ON a.scholarship_id = s.id

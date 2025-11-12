@@ -52,7 +52,7 @@
     </main>
   </div>
 
-  <!-- Scholarship Detail Modal -->
+  
   <div id="scholarshipModal" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -122,7 +122,7 @@
     </div>
   </div>
 </div>
-  <!-- Scripts -->
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="user-hydrate.js.php"></script>
   <script>
@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
     profileImg.classList.toggle("small-profile", sidebar.classList.contains("collapsed"));
   });
 
-  // ✅ Load bookmarks
+  
   const wrap = document.getElementById("bookmarkCards");
 
   fetch("api-bookmarks.php", { credentials: "same-origin", cache: "no-store" })
@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// ✅ Toggle bookmark
+
 function toggleBookmark(scholarshipId, iconElement) {
   fetch("api-bookmarks.php", {
     method: "POST",
@@ -230,7 +230,7 @@ function toggleBookmark(scholarshipId, iconElement) {
     .catch(console.error);
 }
 
-// ✅ View scholarship details
+
 function showScholarshipDetails(scholarshipId) {
   fetch("api-scholarships.php?id=" + scholarshipId, { credentials: "same-origin" })
     .then(r => r.ok ? r.json() : Promise.reject())
@@ -258,7 +258,7 @@ function showScholarshipDetails(scholarshipId) {
     });
 }
 
-// ✅ Submit application
+
 function submitApplication() { /* disabled */ }
 </script>
 </body>

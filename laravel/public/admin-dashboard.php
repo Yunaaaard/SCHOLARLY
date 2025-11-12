@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Require admin session
+
 if (empty($_SESSION['is_admin'])) {
     header('Location: login.html');
     exit();
@@ -13,7 +13,7 @@ if ($conn->connect_error) {
   die('Database connection failed: ' . $conn->connect_error);
 }
 
-// Ensure scholarships table exists
+
 $conn->query("CREATE TABLE IF NOT EXISTS scholarships (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -28,7 +28,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS scholarships (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-// Ensure applications table exists
+
 $conn->query("CREATE TABLE IF NOT EXISTS applications (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id INT UNSIGNED NOT NULL,
@@ -238,7 +238,7 @@ if ($bindTypes !== '') {
     </main>
   </div>
 
-  <!-- Applications Modal -->
+
   <div id="applicationsModal" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -259,7 +259,7 @@ if ($bindTypes !== '') {
     </div>
   </div>
 
-  <!-- Edit Scholarship Modal -->
+
   <div id="editScholarshipModal" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">

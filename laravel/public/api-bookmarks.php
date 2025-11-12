@@ -16,7 +16,7 @@ if ($conn->connect_error) {
   exit();
 }
 
-// Ensure bookmarks table exists
+
 $conn->query("CREATE TABLE IF NOT EXISTS bookmarks (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id INT UNSIGNED NOT NULL,
@@ -27,7 +27,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS bookmarks (
 
 $userId = (int) $_SESSION['user_id'];
 
-// Handle POST requests for toggling bookmarks
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $input = json_decode(file_get_contents('php://input'), true);
   $scholarshipId = (int) ($input['scholarship_id'] ?? 0);
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   
   if ($action === 'toggle') {
-    // Check if already bookmarked
+   
     $checkStmt = $conn->prepare('SELECT id FROM bookmarks WHERE user_id = ? AND scholarship_id = ?');
     $checkStmt->bind_param('ii', $userId, $scholarshipId);
     $checkStmt->execute();
@@ -48,14 +48,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $checkStmt->close();
     
     if ($exists) {
-      // Remove bookmark
+     
       $deleteStmt = $conn->prepare('DELETE FROM bookmarks WHERE user_id = ? AND scholarship_id = ?');
       $deleteStmt->bind_param('ii', $userId, $scholarshipId);
       $deleteStmt->execute();
       $deleteStmt->close();
       echo json_encode(['success' => true, 'bookmarked' => false]);
     } else {
-      // Add bookmark
+      
       $insertStmt = $conn->prepare('INSERT INTO bookmarks (user_id, scholarship_id) VALUES (?, ?)');
       $insertStmt->bind_param('ii', $userId, $scholarshipId);
       $insertStmt->execute();
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   exit();
 }
 
-// GET request - return bookmarked scholarships
+
 $sql = "SELECT s.id, s.title, s.sponsor, s.image_path
         FROM bookmarks b
         JOIN scholarships s ON s.id = b.scholarship_id

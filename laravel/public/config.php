@@ -1,5 +1,4 @@
 <?php
-// Database configuration for XAMPP MySQL
 
 define('DB_HOST', 'localhost');
 define('DB_USERNAME', 'root');

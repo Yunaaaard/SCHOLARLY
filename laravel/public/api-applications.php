@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   
   if ($scholarshipId > 0) {
     try {
-      // Ensure bookmarks table exists
+     
       $conn->query("CREATE TABLE IF NOT EXISTS bookmarks (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         user_id INT UNSIGNED NOT NULL,
@@ -104,11 +104,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       
       $applications = [];
       while ($row = $result->fetch_assoc()) {
-        // Do not fabricate placeholder data; leave missing fields empty so UI can show N/A
+        
         if (!isset($row['username']) || $row['username'] === null) { $row['username'] = ''; }
         if (!isset($row['email']) || $row['email'] === null) { $row['email'] = ''; }
         if (empty($row['contact'])) { $row['contact'] = ''; }
-        // Rename fields to match expected format
+        
         $row['applied_at'] = $row['created_at'];
         $row['status'] = 'bookmarked';
         $applications[] = $row;
