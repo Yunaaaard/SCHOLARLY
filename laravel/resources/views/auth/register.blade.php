@@ -41,7 +41,22 @@
     .signup-text { text-align: center; font-size: 0.9rem; margin-top: 10px; }
     .signup-text a { color: #7b68ce; text-decoration: none; font-weight: 500; }
     .signup-text a:hover { text-decoration: underline; }
-    @media (max-width: 768px) { .left, .right { width: 100%; height: 50vh; } .left { order: 1; } .right { order: 2; } }
+    @media (max-width: 768px) { 
+      .left, .right { width: 100%; height: auto; min-height: 50vh; } 
+      .left { order: 1; padding: 2rem 1rem; } 
+      .right { order: 2; padding: 2rem 1rem; height: auto; } 
+      .container-fluid { height: auto; overflow-y: auto; }
+      html, body { overflow: auto; height: auto; }
+      .left .logo { max-width: 50%; }
+      .back-arrow { top: 15px; left: 15px; font-size: 0.9rem; }
+    }
+    @media (max-width: 480px) {
+      .signup-form { max-width: 100%; }
+      .right { padding: 1.5rem 1rem; }
+      .left { padding: 1.5rem 1rem; }
+      .btn { padding: 0.6rem; font-size: 0.9rem; }
+      .input-group { margin-bottom: 0.8rem; }
+    }
   </style>
 </head>
 <body>

@@ -67,24 +67,38 @@ class AuthController extends Controller
         $contact = trim($request->input('contact'));
         $password = $request->input('password');
 
-        // Ensure uniqueness like legacy
+        // Ensure uniqueness like legacy - fix the query to check both conditions properly
         $exists = DB::table('users')
-            ->where('username', $username)
-            ->orWhere('email', $email)
+            ->where(function($query) use ($username, $email) {
+                $query->where('username', $username)
+                      ->orWhere('email', $email);
+            })
             ->exists();
 
         if ($exists) {
-            return back()->withErrors(['username' => 'Username or email already exists'])->withInput();
+            // Check which one exists
+            $usernameExists = DB::table('users')->where('username', $username)->exists();
+            $emailExists = DB::table('users')->where('email', $email)->exists();
+            
+            if ($usernameExists && $emailExists) {
+                return back()->withErrors(['username' => 'Username and email already exist'])->withInput();
+            } elseif ($usernameExists) {
+                return back()->withErrors(['username' => 'Username already exists'])->withInput();
+            } else {
+                return back()->withErrors(['email' => 'Email already exists'])->withInput();
+            }
         }
 
-        $id = DB::table('users')->insertGetId([
+        // Insert user data - don't include updated_at as legacy table may not have it
+        $userData = [
             'username' => $username,
             'email' => $email,
             'contact' => $contact,
             'password' => Hash::make($password),
             'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        ];
+        
+        $id = DB::table('users')->insertGetId($userData);
 
         Session::put('user_id', $id);
         Session::put('username', $username);

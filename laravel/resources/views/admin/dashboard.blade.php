@@ -16,7 +16,15 @@
 </head>
 <body>
   <div class="dashboard d-flex">
-    <aside class="sidebar d-flex flex-column align-items-center p-3">
+    <!-- Mobile Menu Toggle Button -->
+    <button class="sidebar-toggle d-md-none" id="mobileMenuToggle" style="display: none;">
+      <i class="bi bi-list" style="font-size: 24px; color: white;"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay d-md-none" id="sidebarOverlay" style="display: none;"></div>
+    
+    <aside class="sidebar d-flex flex-column align-items-center p-3" id="sidebar">
       <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo mb-4">
       <div class="profile text-center mb-4">
         <img src="{{ asset('assets/Images/Admin.png') }}" alt="Profile" class="profile-img mb-2">
@@ -28,8 +36,11 @@
         <a href="{{ route('admin') }}" class="nav-link d-flex align-items-center gap-2 text-white">
           <img src="{{ asset('assets/Images/material-symbols_school.png') }}"> Scholarships
         </a>
-        <a href="#" class="nav-link d-flex align-items-center gap-2 text-white">
-          <img src="{{ asset('assets/Images/material-add_symbols_school.png') }}">Add Scholarships
+        <a href="{{ route('admin.add-scholarship') }}" class="nav-link d-flex align-items-center gap-2 text-white">
+          <img src="{{ asset('assets/Images/material-add_symbols_school.png') }}"> Add Scholarships
+        </a>
+        <a href="{{ route('admin.students') }}" class="nav-link d-flex align-items-center gap-2 text-white">
+          <img src="{{ asset('assets/Images/ph_student-bold.png') }}"> Student Management
         </a>
         <a href="{{ route('logout') }}" class="nav-link d-flex align-items-center gap-2 text-white">
           <i class="bi bi-box-arrow-right"></i> Logout
@@ -38,16 +49,16 @@
     </aside>
 
     <main class="main-content flex-grow-1 p-4">
-      <div class="controls d-flex justify-content-between align-items-center mb-4">
-        <form class="d-flex gap-2 w-100" method="GET" action="{{ route('admin') }}">
-          <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Search by title, sponsor or category">
-          <select name="category" class="form-select" style="max-width: 200px;">
+      <div class="controls d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 gap-3">
+        <form class="d-flex flex-column flex-md-row gap-2 w-100" method="GET" action="{{ route('admin') }}">
+          <input type="text" name="q" value="{{ request('q') }}" class="form-control flex-fill" placeholder="Search by title, sponsor or category">
+          <select name="category" class="form-select" style="max-width: 100%; min-width: 150px;">
             <option value="">All Categories</option>
             <option value="Company" @selected(request('category')==='Company')>Company</option>
             <option value="School" @selected(request('category')==='School')>School</option>
             <option value="Organization" @selected(request('category')==='Organization')>Organization</option>
           </select>
-          <select id="sort" name="sort" class="form-select" style="max-width: 200px;">
+          <select id="sort" name="sort" class="form-select" style="max-width: 100%; min-width: 150px;">
             <option value="">Sort: Default</option>
             <option value="title_asc" @selected(request('sort')==='title_asc')>Title A-Z</option>
             <option value="title_desc" @selected(request('sort')==='title_desc')>Title Z-A</option>
@@ -105,6 +116,26 @@
             <div class="mb-3">
               <label for="editDescription" class="form-label">Description</label>
               <div class="rich-text-editor border rounded p-2" style="min-height: 200px; background: white;">
+                <div class="toolbar mb-2 border-bottom pb-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatEditText('bold')" title="Bold">
+                    <i class="bi bi-type-bold"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatEditText('italic')" title="Italic">
+                    <i class="bi bi-type-italic"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="formatEditText('underline')" title="Underline">
+                    <i class="bi bi-type-underline"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertEditLineBreak()" title="Line Break">
+                    <i class="bi bi-text-paragraph"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertEditBulletList()" title="Bullet List">
+                    <i class="bi bi-list-ul"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertEditNumberedList()" title="Numbered List">
+                    <i class="bi bi-list-ol"></i>
+                  </button>
+                </div>
                 <div contenteditable="true" id="editDescriptionEditor" class="description-content" style="min-height: 150px; outline: none;" data-placeholder="Provide a detailed description with formatting..."></div>
               </div>
               <textarea id="editDescription" name="description" style="display: none;" required></textarea>
@@ -164,7 +195,22 @@
     const apiBase = '{{ url('api') }}';
 
     function loadScholarships() {
-      fetch(apiBase + '/scholarships', { credentials: 'same-origin' })
+      // Get filter parameters from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const q = urlParams.get('q') || '';
+      const category = urlParams.get('category') || '';
+      const sort = urlParams.get('sort') || '';
+      
+      // Build query string
+      const params = new URLSearchParams();
+      if (q) params.append('q', q);
+      if (category) params.append('category', category);
+      if (sort) params.append('sort', sort);
+      
+      const queryString = params.toString();
+      const url = apiBase + '/scholarships' + (queryString ? '?' + queryString : '');
+      
+      fetch(url, { credentials: 'same-origin' })
         .then(r => r.json())
         .then(items => {
           listEl.innerHTML = '';
@@ -208,10 +254,35 @@
         .catch(() => { document.getElementById('applicationsList').innerHTML = '<div class="alert alert-danger">Failed to load applications</div>'; });
     }
 
+    // Rich text editor functions for edit modal
+    function formatEditText(command) {
+      document.execCommand(command, false, null);
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
+    function insertEditLineBreak() {
+      document.execCommand('insertHTML', false, '<br><br>');
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
+    function insertEditBulletList() {
+      document.execCommand('insertUnorderedList', false, null);
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
+    function insertEditNumberedList() {
+      document.execCommand('insertOrderedList', false, null);
+      document.getElementById('editDescriptionEditor').focus();
+    }
+
     function editScholarship(scholarshipId) {
       fetch(`${apiBase}/admin/edit-scholarship?id=${scholarshipId}`, { credentials: 'same-origin' })
         .then(r => r.json())
         .then(s => {
+          if (s.error) {
+            alert('Failed to load scholarship: ' + s.error);
+            return;
+          }
           document.getElementById('editScholarshipId').value = s.id;
           document.getElementById('editTitle').value = s.title || '';
           document.getElementById('editSponsor').value = s.sponsor || '';
@@ -224,23 +295,53 @@
           document.getElementById('editPhone').value = s.phone || '';
           new bootstrap.Modal(document.getElementById('editScholarshipModal')).show();
         })
-        .catch(() => alert('Failed to load scholarship data'));
+        .catch(err => {
+          console.error('Error:', err);
+          alert('Failed to load scholarship data');
+        });
     }
 
     document.getElementById('editScholarshipForm').addEventListener('submit', function(e){
       e.preventDefault();
       const form = e.target;
       const id = document.getElementById('editScholarshipId').value;
-      document.getElementById('editDescription').value = document.getElementById('editDescriptionEditor').innerHTML;
+      
+      // Sync rich text editor content
+      const editorContent = document.getElementById('editDescriptionEditor').innerHTML;
+      document.getElementById('editDescription').value = editorContent;
+      
       const fd = new FormData(form);
       fd.append('_token', '{{ csrf_token() }}');
-      fetch(`${apiBase}/admin/edit-scholarship`, { method: 'POST', body: fd, credentials: 'same-origin' })
+      fd.append('id', id);
+      
+      // Ensure description is set
+      if (!fd.get('description')) {
+        fd.set('description', editorContent);
+      }
+      
+      fetch(`${apiBase}/admin/edit-scholarship`, { 
+        method: 'POST', 
+        body: fd, 
+        credentials: 'same-origin',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+      })
         .then(r => r.json())
         .then(data => {
-          if (data.success) { alert('Scholarship updated successfully'); bootstrap.Modal.getInstance(document.getElementById('editScholarshipModal')).hide(); loadScholarships(); }
-          else { alert('Failed to update scholarship: ' + (data.error || (data.errors && data.errors.join(', ')) || 'Unknown error')); }
+          if (data.success) { 
+            alert('Scholarship updated successfully'); 
+            bootstrap.Modal.getInstance(document.getElementById('editScholarshipModal')).hide(); 
+            loadScholarships(); 
+          } else { 
+            const errorMsg = data.error || (data.errors && Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors)) || 'Unknown error';
+            alert('Failed to update scholarship: ' + errorMsg); 
+          }
         })
-        .catch(() => alert('Failed to update scholarship'));
+        .catch(err => {
+          console.error('Error:', err);
+          alert('Failed to update scholarship: ' + err.message);
+        });
     });
 
     document.getElementById('deleteScholarshipBtn').addEventListener('click', function(){
@@ -254,7 +355,39 @@
         .catch(() => alert('Failed to delete scholarship'));
     });
 
-    // init
+    // Mobile menu functionality
+    (function() {
+      const sidebar = document.querySelector('.sidebar');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      
+      if (mobileToggle && sidebarOverlay) {
+        mobileToggle.addEventListener('click', function() {
+          sidebar.classList.add('active');
+          sidebarOverlay.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        });
+        
+        sidebarOverlay.addEventListener('click', function() {
+          sidebar.classList.remove('active');
+          sidebarOverlay.style.display = 'none';
+          document.body.style.overflow = '';
+        });
+        
+        const navLinks = sidebar.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+              sidebar.classList.remove('active');
+              sidebarOverlay.style.display = 'none';
+              document.body.style.overflow = '';
+            }
+          });
+        });
+      }
+    })();
+
+    // Load scholarships on page load
     loadScholarships();
   </script>
 </body>

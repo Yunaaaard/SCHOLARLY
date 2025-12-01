@@ -10,10 +10,18 @@
 </head>
 <body>
   <div class="dashboard d-flex">
-    <aside class="sidebar d-flex flex-column align-items-center p-3">
+    <!-- Mobile Menu Toggle Button -->
+    <button class="sidebar-toggle d-md-none" id="mobileMenuToggle" style="display: none;">
+      <i class="bi bi-list" style="font-size: 24px; color: white;"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay d-md-none" id="sidebarOverlay" style="display: none;"></div>
+    
+    <aside class="sidebar d-flex flex-column align-items-center p-3" id="sidebar">
       <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo mb-4 sidebar-logo">
       <div class="profile text-center mb-4">
-        <img src="{{ asset('assets/Images/profile.png') }}" alt="Profile" class="profile-img mb-2">
+        <img src="{{ asset('assets/Images/profile.png') }}" alt="Profile" class="profile-img mb-2 big-circle">
         <h2 class="h5 fw-bold sidebarName">{{ session('username') }}</h2>
         <p class="small mb-2">STUDENT</p>
         <a href="{{ url('/profile/edit') }}" class="btn btn-sm btn-outline-light">EDIT PROFILE</a>
@@ -26,7 +34,9 @@
         <a href="{{ url('/notifications') }}" class="nav-link d-flex align-items-center gap-2 text-white active"><i class="bi bi-bell"></i> Notifications</a>
         <a href="{{ route('logout') }}" class="nav-link d-flex align-items-center gap-2 text-white"><i class="bi bi-box-arrow-right"></i> Logout</a>
       </nav>
-      <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('collapsed')"><span>←</span></button>
+      <button class="sidebar-toggle d-none d-md-flex" id="sidebarToggle">
+        <img src="{{ asset('assets/Images/left_arrow.png') }}" alt="Toggle Sidebar" class="arrow-icon">
+      </button>
     </aside>
     <main class="main-content flex-grow-1 p-4">
       <h2 class="fw-bold mb-4">Notifications</h2>
@@ -40,6 +50,41 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Mobile menu functionality
+    (function() {
+      const sidebar = document.querySelector('.sidebar');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      
+      if (mobileToggle && sidebarOverlay) {
+        mobileToggle.addEventListener('click', function() {
+          sidebar.classList.add('active');
+          sidebarOverlay.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        });
+        
+        sidebarOverlay.addEventListener('click', function() {
+          sidebar.classList.remove('active');
+          sidebarOverlay.style.display = 'none';
+          document.body.style.overflow = '';
+        });
+        
+        const navLinks = sidebar.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+              sidebar.classList.remove('active');
+              sidebarOverlay.style.display = 'none';
+              document.body.style.overflow = '';
+            }
+          });
+        });
+      }
+      
+      const toggle = document.querySelector('#sidebarToggle');
+      if (toggle) toggle.addEventListener('click', ()=>{ sidebar.classList.toggle('collapsed'); });
+    })();
+    
     (function() {
       fetch('{{ url('api/notifications') }}', { credentials: 'same-origin' })
         .then(r => r.ok ? r.json() : Promise.reject())

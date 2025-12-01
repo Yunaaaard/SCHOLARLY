@@ -45,25 +45,82 @@ class ApiController extends Controller
 
         // List scholarships
         $query = $request->get('q', '');
+        $category = $request->get('category', '');
+        $sort = $request->get('sort', '');
         
         $scholarships = DB::table('scholarships as s');
+        
+        // Handle sorting by applications count (bookmarks count)
+        $needsAppCount = ($sort === 'apps_high');
+        
+        if ($needsAppCount) {
+            $scholarships->leftJoin('bookmarks as app_count', 'app_count.scholarship_id', '=', 's.id');
+        }
         
         if ($userId > 0) {
             $scholarships->leftJoin('bookmarks as b', function($join) use ($userId) {
                 $join->on('b.scholarship_id', '=', 's.id')
                      ->where('b.user_id', $userId);
-            })
-            ->select('s.id', 's.title', 's.sponsor', 's.category', 's.image_path', DB::raw('(b.id IS NOT NULL) as bookmarked'));
+            });
+            
+            if ($needsAppCount) {
+                $scholarships->select('s.id', 's.title', 's.sponsor', 's.category', 's.image_path', 's.start_date', 's.end_date', 
+                    DB::raw('(b.id IS NOT NULL) as bookmarked'),
+                    DB::raw('COUNT(DISTINCT app_count.id) as app_count'));
+            } else {
+                $scholarships->select('s.id', 's.title', 's.sponsor', 's.category', 's.image_path', 's.start_date', 's.end_date', 
+                    DB::raw('(b.id IS NOT NULL) as bookmarked'));
+            }
         } else {
-            $scholarships->select('s.id', 's.title', 's.sponsor', 's.category', 's.image_path');
+            if ($needsAppCount) {
+                $scholarships->select('s.id', 's.title', 's.sponsor', 's.category', 's.image_path', 's.start_date', 's.end_date',
+                    DB::raw('COUNT(DISTINCT app_count.id) as app_count'));
+            } else {
+                $scholarships->select('s.id', 's.title', 's.sponsor', 's.category', 's.image_path', 's.start_date', 's.end_date');
+            }
         }
         
+        // Apply search filter
         if ($query) {
             $scholarships->where(function($q) use ($query) {
                 $q->where('s.title', 'like', "%{$query}%")
                   ->orWhere('s.sponsor', 'like', "%{$query}%")
                   ->orWhere('s.category', 'like', "%{$query}%");
             });
+        }
+        
+        // Apply category filter
+        if ($category) {
+            $scholarships->where('s.category', $category);
+        }
+        
+        // Group by if sorting by applications
+        if ($needsAppCount) {
+            $scholarships->groupBy('s.id', 's.title', 's.sponsor', 's.category', 's.image_path', 's.start_date', 's.end_date');
+            if ($userId > 0) {
+                $scholarships->addSelect(DB::raw('MAX(CASE WHEN b.user_id = ' . (int)$userId . ' THEN 1 ELSE 0 END) as bookmarked'));
+            }
+        }
+        
+        // Apply sorting
+        switch ($sort) {
+            case 'title_asc':
+                $scholarships->orderBy('s.title', 'asc');
+                break;
+            case 'title_desc':
+                $scholarships->orderBy('s.title', 'desc');
+                break;
+            case 'start_new':
+                $scholarships->orderBy('s.start_date', 'desc');
+                break;
+            case 'end_new':
+                $scholarships->orderBy('s.end_date', 'desc');
+                break;
+            case 'apps_high':
+                $scholarships->orderByRaw('COUNT(DISTINCT app_count.id) DESC');
+                break;
+            default:
+                $scholarships->orderBy('s.created_at', 'desc');
         }
         
         $items = $scholarships->get()->map(function($item) {
@@ -250,22 +307,42 @@ class ApiController extends Controller
         }
 
         $id = (int) $request->input('id', 0);
-        $data = $request->validate([
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'sponsor' => 'nullable|string',
-            'category' => 'required|string|in:Company,School,Organization,Government,Foundation,Non-Profit,Individual,Other',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string'
-        ]);
+        
+        if ($id <= 0) {
+            return response()->json(['success' => false, 'error' => 'Invalid scholarship ID']);
+        }
+        
+        // Check if scholarship exists
+        $exists = DB::table('scholarships')->where('id', $id)->exists();
+        if (!$exists) {
+            return response()->json(['success' => false, 'error' => 'Scholarship not found']);
+        }
+        
+        try {
+            $data = $request->validate([
+                'title' => 'required|string',
+                'description' => 'required|string',
+                'sponsor' => 'nullable|string',
+                'category' => 'required|string|in:Company,School,Organization,Government,Foundation,Non-Profit,Individual,Other',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'email' => 'nullable|email',
+                'phone' => 'nullable|string'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false, 
+                'error' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
+        // Handle image upload
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $ext = strtolower($file->getClientOriginalExtension());
             if (!in_array($ext, ['jpg','jpeg','png'])) {
-                return response()->json(['success' => false, 'errors' => ['Only JPG and PNG images are allowed.']]);
+                return response()->json(['success' => false, 'error' => 'Only JPG and PNG images are allowed.']);
             }
             $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safe = preg_replace('/[^A-Za-z0-9-_]/', '_', $filename);
@@ -274,6 +351,10 @@ class ApiController extends Controller
             $data['image_path'] = 'uploads/' . $name;
         }
 
+        // Don't include updated_at if column doesn't exist
+        // Remove updated_at from data array if it was added
+        unset($data['updated_at']);
+        
         DB::table('scholarships')->where('id', $id)->update($data);
         return response()->json(['success' => true, 'message' => 'Scholarship updated successfully']);
     }
@@ -300,8 +381,9 @@ class ApiController extends Controller
                 'username' => $request->input('username'),
                 'email' => $request->input('email'),  
                 'contact' => $request->input('contact'),
-                'updated_at' => now()
             ];
+            
+            // Don't include updated_at as legacy table may not have it
 
             if ($request->filled('password')) {
                 $data['password'] = bcrypt($request->input('password'));

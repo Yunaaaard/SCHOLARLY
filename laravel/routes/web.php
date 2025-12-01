@@ -8,7 +8,7 @@ use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
     return view('index');
-});
+})->name('index');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -22,6 +22,19 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 // Admin
 Route::get('/admin', [AdminController::class, 'index'])->name('admin');
 Route::get('/admin-dashboard.php', function () { return redirect()->route('admin'); });
+
+// Admin - Add Scholarship
+Route::get('/admin/add-scholarship', [AdminController::class, 'showAddScholarship'])->name('admin.add-scholarship');
+Route::post('/admin/add-scholarship', [AdminController::class, 'addScholarship'])->name('admin.add-scholarship.post');
+
+// Admin - Student Management
+Route::get('/admin/students', [AdminController::class, 'studentManagement'])->name('admin.students');
+Route::post('/admin/students/delete', [AdminController::class, 'deleteStudent'])->name('admin.students.delete');
+Route::get('/admin/students/details', [AdminController::class, 'getStudentDetails'])->name('admin.students.details');
+
+// Back-compat routes
+Route::get('/add-scholarship.php', function () { return redirect()->route('admin.add-scholarship'); });
+Route::get('/studentmanagementboard.php', function () { return redirect()->route('admin.students'); });
 
 // Simple pages
 Route::get('/settings', function () { if (!session()->has('user_id')) return redirect()->route('login'); return view('settings'); });

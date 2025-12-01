@@ -7,18 +7,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scholarly - Home</title>
-  <link rel="stylesheet" href="assets/css/home.css">
+  <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
 </head>
 <body>
-  <div style="min-height: 100vh; display: flex; flex-direction: column; background-image: url('assets/images/HOME PAGE.png'); background-size: cover; background-position: center;">
+  <div style="min-height: 100vh; display: flex; flex-direction: column; background-image: url('{{ asset('assets/images/HOME PAGE.png') }}'); background-size: cover; background-position: center;">
     <div class="navbar">
       <div class="nav-left">
-        <img src="assets/images/Group 44.png" alt="Scholarly Logo"/>
+        <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo"/>
       </div>
       <div class="nav-right">
         <a href="/" class="nav-btn">Home</a>
-        <a href="login.html" class="nav-link">Login</a>
-        <a href="register.html" class="nav-link">Register</a>
+        <a href="{{ route('login') }}" class="nav-link">Login</a>
+        <a href="{{ route('register') }}" class="nav-link">Register</a>
       </div>
     </div>
 
@@ -30,7 +30,7 @@
         <div class="hero-subtitle">
           Empowering Learning, <span>One at a Time</span>.
         </div>
-        <a href="#" class="get-started">GET STARTED</a>
+        <a href="{{ route('register') }}" class="get-started">GET STARTED</a>
       </div>
     </div>
 

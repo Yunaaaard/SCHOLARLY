@@ -12,46 +12,54 @@
 </head>
 <body>
   <div class="dashboard d-flex">
-    <aside class="sidebar d-flex flex-column align-items-center p-3">
+    <!-- Mobile Menu Toggle Button -->
+    <button class="sidebar-toggle d-md-none" id="mobileMenuToggle" style="display: none;">
+      <i class="bi bi-list" style="font-size: 24px; color: white;"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay d-md-none" id="sidebarOverlay" style="display: none;"></div>
+    
+    <aside class="sidebar d-flex flex-column align-items-center p-3" id="sidebar">
       <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo mb-4 sidebar-logo">
       <div class="profile text-center mb-4">
         <img src="{{ asset('assets/Images/profile.png') }}" alt="" class="profile-img mb-2 big-circle">
         <h2 id="sidebarName" class="h5 fw-bold">{{ session('username') }}</h2>
         <p class="small mb-2">STUDENT</p>
-        <a class="btn btn-primary rounded-pill" href="{{ url('../../edit.html') }}">Edit Profile</a>
+        <a class="btn btn-primary rounded-pill" href="{{ url('/profile/edit') }}">Edit Profile</a>
       </div>
       <hr class="w-100">
       <nav class="nav flex-column w-100">
         <a href="{{ route('dashboard') }}" class="nav-link d-flex align-items-center gap-2 text-white">
           <i class="bi bi-house-door"></i> Home
         </a>
-        <a href="{{ url('../../settings.html') }}" class="nav-link d-flex align-items-center gap-2 text-white">
+        <a href="{{ url('/settings') }}" class="nav-link d-flex align-items-center gap-2 text-white">
           <i class="bi bi-gear"></i> Settings
         </a>
-        <a href="{{ url('../../bookmark.html') }}" class="nav-link d-flex align-items-center gap-2 text-white">
+        <a href="{{ url('/bookmarks') }}" class="nav-link d-flex align-items-center gap-2 text-white">
           <i class="bi bi-bookmark"></i> Bookmarks
         </a>
         <a href="{{ route('logout') }}" class="nav-link d-flex align-items-center gap-2 text-white">
           <i class="bi bi-box-arrow-right"></i> Logout
         </a>
       </nav>
-      <button class="sidebar-toggle" id="sidebarToggle">
+      <button class="sidebar-toggle d-none d-md-flex" id="sidebarToggle">
         <img src="{{ asset('assets/Images/left_arrow.png') }}" alt="Toggle Sidebar" class="arrow-icon">
       </button>
     </aside>
 
     <main class="main-content flex-grow-1 p-4">
-      <div class="controls d-flex justify-content-between align-items-center mb-4">
-        <div class="search-container position-relative">
+      <div class="controls d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-4 gap-3">
+        <div class="search-container position-relative w-100">
           <i class="bi bi-search position-absolute" style="top: 50%; left: 12px; transform: translateY(-50%); color: #6c757d;"></i>
           <input type="text" class="form-control search-input ps-5" placeholder="Search available scholarships">
         </div>
-        <div class="filter-sort d-flex gap-2">
-          <button class="btn btn-outline-secondary filter-btn d-flex align-items-center gap-1">
-            <i class="bi bi-funnel"></i> FILTER
+        <div class="filter-sort d-flex gap-2 w-100 w-md-auto">
+          <button class="btn btn-outline-secondary filter-btn d-flex align-items-center gap-1 flex-fill flex-md-initial">
+            <i class="bi bi-funnel"></i> <span class="d-none d-sm-inline">FILTER</span>
           </button>
-          <button class="btn btn-outline-secondary sort-btn d-flex align-items-center gap-1">
-            <i class="bi bi-arrow-down-up"></i> SORT
+          <button class="btn btn-outline-secondary sort-btn d-flex align-items-center gap-1 flex-fill flex-md-initial">
+            <i class="bi bi-arrow-down-up"></i> <span class="d-none d-sm-inline">SORT</span>
           </button>
         </div>
       </div>
@@ -192,9 +200,39 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
       }).catch(()=>{});
     }
 
+    // Desktop sidebar toggle
     const sidebar = document.querySelector('.sidebar');
-    const toggle = document.querySelector('.sidebar-toggle');
+    const toggle = document.querySelector('#sidebarToggle');
     if (toggle) toggle.addEventListener('click', ()=>{ sidebar.classList.toggle('collapsed'); });
+    
+    // Mobile menu toggle
+    const mobileToggle = document.getElementById('mobileMenuToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (mobileToggle && sidebarOverlay) {
+      mobileToggle.addEventListener('click', function() {
+        sidebar.classList.add('active');
+        sidebarOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      });
+      
+      sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+      });
+      
+      // Close sidebar when clicking nav links on mobile
+      const navLinks = sidebar.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            sidebar.classList.remove('active');
+            sidebarOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+          }
+        });
+      });
+    }
 
     let currentScholarshipId = null;
     function showScholarshipDetails(scholarshipId) {

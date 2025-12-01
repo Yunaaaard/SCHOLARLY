@@ -36,14 +36,28 @@
     .signup-text a:hover { text-decoration: underline; }
     .back-arrow { position: absolute; top: 20px; left: 20px; color: #fff; text-decoration: none; font-weight: 500; font-size: 1rem; z-index: 10; }
     .back-arrow:hover { text-decoration: underline; }
-    @media (max-width: 768px) { .left, .right { width: 100%; height: 50vh; } .left { order: 1; } .right { order: 2; } }
+    @media (max-width: 768px) { 
+      .left, .right { width: 100%; height: auto; min-height: 50vh; } 
+      .left { order: 1; padding: 2rem 1rem; } 
+      .right { order: 2; padding: 2rem 1rem; height: auto; } 
+      .container-fluid { height: auto; overflow-y: auto; }
+      html, body { overflow: auto; height: auto; }
+      .left .logo { max-width: 50%; }
+      .back-arrow { top: 15px; left: 15px; font-size: 0.9rem; }
+    }
+    @media (max-width: 480px) {
+      .login-form { max-width: 100%; }
+      .right { padding: 1.5rem 1rem; }
+      .left { padding: 1.5rem 1rem; }
+      .btn { padding: 0.6rem; font-size: 0.9rem; }
+    }
   </style>
 </head>
 <body>
   <div class="container-fluid">
     <div class="row g-0">
       <div class="col-md-8 left">
-        <a href="{{ route('login') }}" class="back-arrow">&#8592; Back</a>
+        <a href="{{ route('index') }}" class="back-arrow">&#8592; Back</a>
         <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo img-fluid">
       </div>
       <div class="col-md-4 right">

@@ -917,3 +917,279 @@ body {
   margin: 0;
   font-weight: 400;
 }
+
+/* ============ RESPONSIVE DESIGN ============ */
+
+/* Mobile devices (up to 768px) */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .sidebar {
+    width: 280px;
+    max-width: 85%;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+  }
+
+  #mobileMenuToggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: #A4A4D7;
+    border: 2px solid #fff;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+  }
+
+  #mobileMenuToggle:hover {
+    background: #8b8bc7;
+  }
+  
+  .d-md-none {
+    display: none !important;
+  }
+  
+  @media (max-width: 768px) {
+    .d-md-none {
+      display: block !important;
+    }
+    
+    .d-none.d-md-flex {
+      display: none !important;
+    }
+  }
+
+  .main-content {
+    width: 100%;
+    padding: 20px 15px;
+    margin-top: 60px;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .search-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .filter-sort {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .filter-sort .btn {
+    flex: 1;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .card-left {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .card-left img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .card-middle {
+    width: 100%;
+    padding-left: 0;
+  }
+
+  .card-right {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: auto;
+  }
+
+  .card-right .btn-primary {
+    flex: 1;
+    margin-left: 10px;
+  }
+
+  .profile-img,
+  .big-circle {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .sidebar .logo {
+    width: 180px;
+    height: auto;
+  }
+
+  .modal-dialog {
+    margin: 10px;
+  }
+
+  .modal-lg {
+    max-width: calc(100% - 20px);
+  }
+
+  .scholarship-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .scholarship-meta {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .main-content h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Tablet devices (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 220px;
+  }
+
+  .sidebar.collapsed {
+    width: 60px;
+  }
+
+  .main-content {
+    padding: 25px;
+  }
+
+  .controls {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .search-container {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .filter-sort {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .card-left img {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Small mobile devices (up to 480px) */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 15px 10px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-sponsor {
+    font-size: 12px;
+  }
+
+  .btn-primary {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .search-container input[type="text"] {
+    font-size: 14px;
+    padding: 10px 15px 10px 40px;
+  }
+
+  .filter-sort .btn {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .profile-img,
+  .big-circle {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .sidebar .logo {
+    width: 150px;
+  }
+
+  .scholarship-title {
+    font-size: 18px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .sidebar {
+    width: 280px;
+    left: -280px;
+  }
+
+  .main-content {
+    margin-top: 0;
+  }
+}
