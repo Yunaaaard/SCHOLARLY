@@ -13,17 +13,17 @@
 <body>
   <div class="dashboard d-flex">
     <!-- Mobile Menu Toggle Button -->
-    <button class="sidebar-toggle d-md-none" id="mobileMenuToggle" style="display: none;">
+    <button class="sidebar-toggle d-md-none" id="mobileMenuToggle">
       <i class="bi bi-list" style="font-size: 24px; color: white;"></i>
     </button>
     
     <!-- Overlay for mobile -->
-    <div class="sidebar-overlay d-md-none" id="sidebarOverlay" style="display: none;"></div>
+    <div class="sidebar-overlay d-md-none" id="sidebarOverlay"></div>
     
     <aside class="sidebar d-flex flex-column align-items-center p-3" id="sidebar">
       <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo mb-4 sidebar-logo">
       <div class="profile text-center mb-4">
-        <img src="{{ asset('assets/Images/profile.png') }}" alt="" class="profile-img mb-2 big-circle">
+        <img src="{{ $profile_picture ?? asset('assets/Images/profile.png') }}" alt="" class="profile-img mb-2 big-circle" onerror="this.src='{{ asset('assets/Images/profile.png') }}'">
         <h2 id="sidebarName" class="h5 fw-bold">{{ session('username') }}</h2>
         <p class="small mb-2">STUDENT</p>
         <a class="btn btn-primary rounded-pill" href="{{ url('/profile/edit') }}">Edit Profile</a>
@@ -55,11 +55,16 @@
           <input type="text" class="form-control search-input ps-5" placeholder="Search available scholarships">
         </div>
         <div class="filter-sort d-flex gap-2 w-100 w-md-auto">
-          <button class="btn btn-outline-secondary filter-btn d-flex align-items-center gap-1 flex-fill flex-md-initial">
-            <i class="bi bi-funnel"></i> <span class="d-none d-sm-inline">FILTER</span>
-          </button>
+          <div class="dropdown flex-fill flex-md-initial">
+            <button class="btn btn-outline-secondary dropdown-toggle filter-btn d-flex align-items-center gap-1 w-100" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-funnel"></i> <span>FILTER</span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="filterDropdown" id="filterDropdownMenu">
+              <li><a class="dropdown-item" href="#" data-category="">All Categories</a></li>
+            </ul>
+          </div>
           <button class="btn btn-outline-secondary sort-btn d-flex align-items-center gap-1 flex-fill flex-md-initial">
-            <i class="bi bi-arrow-down-up"></i> <span class="d-none d-sm-inline">SORT</span>
+            <i class="bi bi-arrow-down-up"></i> <span>SORT</span>
           </button>
         </div>
       </div>
@@ -118,9 +123,18 @@ fetch('{{ url('api/user-profile') }}', { credentials: 'same-origin' })
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(data => {
           if (data.username) document.getElementById('sidebarName').textContent = data.username;
+          // Only update profile picture if it's different from what's already loaded
           if (data.profile_picture) {
             const imgEl = document.querySelector('.profile-img');
-            if (imgEl) imgEl.src = data.profile_picture;
+            if (imgEl) {
+              const profilePicUrl = data.profile_picture.startsWith('http') 
+                ? data.profile_picture 
+                : '{{ url("/") }}/' + data.profile_picture;
+              // Only update if different to prevent flash
+              if (imgEl.src !== profilePicUrl && imgEl.src !== '{{ url("/") }}/' + data.profile_picture) {
+                imgEl.src = profilePicUrl;
+              }
+            }
           }
         }).catch(() => {});
 
@@ -177,16 +191,62 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
           if (searchEl) searchEl.addEventListener('input', ()=>{ render(applyFilters()); });
           const sortBtn = document.querySelector('.sort-btn');
           if (sortBtn) sortBtn.addEventListener('click', ()=>{ sortAsc=!sortAsc; render(applyFilters()); });
-          const filterBtn = document.querySelector('.filter-btn');
-          if (filterBtn) {
-            const container = document.querySelector('.filter-sort');
-            const select = document.createElement('select'); select.className='form-select'; select.style.maxWidth='180px'; select.style.display='none';
-            const optAll=document.createElement('option'); optAll.value=''; optAll.textContent='All Categories'; select.appendChild(optAll);
-            const cats=[...new Set(allItems.map(it=>it.category||'').filter(Boolean))];
-            cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; select.appendChild(o); });
-            container.insertBefore(select, container.firstChild);
-            filterBtn.addEventListener('click', ()=>{ select.style.display = (select.style.display==='none')?'block':'none'; });
-            select.addEventListener('change', ()=>{ currentCategory = select.value || ''; render(applyFilters()); });
+          const filterDropdownMenu = document.getElementById('filterDropdownMenu');
+          if (filterDropdownMenu) {
+            const cats = [...new Set(allItems.map(it => it.category || '').filter(Boolean))];
+            cats.forEach(c => {
+              const li = document.createElement('li');
+              const a = document.createElement('a');
+              a.className = 'dropdown-item';
+              a.href = '#';
+              a.textContent = c;
+              a.setAttribute('data-category', c);
+              a.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentCategory = c;
+                // Update button text
+                const filterBtn = document.querySelector('.filter-btn');
+                if (filterBtn) {
+                  const span = filterBtn.querySelector('span');
+                  if (span) {
+                    span.textContent = c;
+                  } else {
+                    const icon = filterBtn.querySelector('i');
+                    if (icon) {
+                      filterBtn.innerHTML = '<i class="bi bi-funnel"></i> <span>' + c + '</span>';
+                    }
+                  }
+                }
+                // Close dropdown
+                const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('filterDropdown'));
+                if (dropdown) dropdown.hide();
+                render(applyFilters());
+              });
+              li.appendChild(a);
+              filterDropdownMenu.appendChild(li);
+            });
+            // Add click handler for "All Categories"
+            const allCategoriesItem = filterDropdownMenu.querySelector('[data-category=""]');
+            if (allCategoriesItem) {
+              allCategoriesItem.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentCategory = '';
+                // Update button text back to "FILTER"
+                const filterBtn = document.querySelector('.filter-btn');
+                if (filterBtn) {
+                  const span = filterBtn.querySelector('span');
+                  if (span) {
+                    span.textContent = 'FILTER';
+                  } else {
+                    filterBtn.innerHTML = '<i class="bi bi-funnel"></i> <span>FILTER</span>';
+                  }
+                }
+                // Close dropdown
+                const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('filterDropdown'));
+                if (dropdown) dropdown.hide();
+                render(applyFilters());
+              });
+            }
           }
         }).catch(()=>{});
     })();
@@ -205,33 +265,104 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
     const toggle = document.querySelector('#sidebarToggle');
     if (toggle) toggle.addEventListener('click', ()=>{ sidebar.classList.toggle('collapsed'); });
     
-    // Mobile menu toggle
+    // Mobile menu functionality
     const mobileToggle = document.getElementById('mobileMenuToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
-    if (mobileToggle && sidebarOverlay) {
-      mobileToggle.addEventListener('click', function() {
+    
+    // Initialize: ensure overlay is hidden on page load
+    if (sidebarOverlay) {
+      sidebarOverlay.classList.remove('active');
+      sidebarOverlay.style.display = 'none';
+      sidebarOverlay.style.pointerEvents = 'none';
+    }
+    if (sidebar) {
+      sidebar.classList.remove('active');
+    }
+    
+    function openMobileMenu() {
+      if (sidebar && sidebarOverlay) {
         sidebar.classList.add('active');
+        sidebarOverlay.classList.add('active');
         sidebarOverlay.style.display = 'block';
+        sidebarOverlay.style.pointerEvents = 'auto';
         document.body.style.overflow = 'hidden';
+        // Hide the toggle button when sidebar opens (with slight delay to ensure smooth transition)
+        if (mobileToggle) {
+          setTimeout(() => {
+            mobileToggle.style.display = 'none';
+          }, 100);
+        }
+      }
+    }
+    
+    function closeMobileMenu() {
+      if (sidebar && sidebarOverlay) {
+        // Show the toggle button immediately when closing
+        if (mobileToggle) {
+          mobileToggle.style.display = 'flex';
+        }
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        sidebarOverlay.style.display = 'none';
+        sidebarOverlay.style.pointerEvents = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+    
+    if (mobileToggle && sidebarOverlay) {
+      mobileToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Don't prevent default on button click
+        if (sidebar && sidebar.classList.contains('active')) {
+          closeMobileMenu();
+        } else {
+          openMobileMenu();
+        }
       });
       
-      sidebarOverlay.addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.style.display = 'none';
-        document.body.style.overflow = '';
+      sidebarOverlay.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeMobileMenu();
       });
       
       // Close sidebar when clicking nav links on mobile
-      const navLinks = sidebar.querySelectorAll('.nav-link');
-      navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-          if (window.innerWidth <= 768) {
-            sidebar.classList.remove('active');
-            sidebarOverlay.style.display = 'none';
-            document.body.style.overflow = '';
-          }
+      if (sidebar) {
+        const navLinks = sidebar.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+            // Allow navigation to proceed immediately, close menu asynchronously
+            if (window.innerWidth <= 768) {
+              setTimeout(() => {
+                closeMobileMenu();
+              }, 0);
+            }
+          });
         });
-      });
+      }
+      
+      // Hide button when scrolling down, show when scrolling up (only on mobile)
+      if (window.innerWidth <= 768) {
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+          if (window.innerWidth <= 768 && mobileToggle) {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Only hide/show if sidebar is not open
+            if (!sidebar || !sidebar.classList.contains('active')) {
+              if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down - hide button
+                mobileToggle.style.opacity = '0';
+                mobileToggle.style.pointerEvents = 'none';
+              } else if (scrollTop < lastScrollTop) {
+                // Scrolling up - show button
+                mobileToggle.style.opacity = '1';
+                mobileToggle.style.pointerEvents = 'auto';
+              }
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+          }
+        }, false);
+      }
     }
 
     let currentScholarshipId = null;

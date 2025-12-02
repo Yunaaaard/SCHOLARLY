@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ApiController;
@@ -15,6 +16,12 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot-password.post');
+
+Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('reset-password.post');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -36,11 +43,47 @@ Route::get('/admin/students/details', [AdminController::class, 'getStudentDetail
 Route::get('/add-scholarship.php', function () { return redirect()->route('admin.add-scholarship'); });
 Route::get('/studentmanagementboard.php', function () { return redirect()->route('admin.students'); });
 
-// Simple pages
-Route::get('/settings', function () { if (!session()->has('user_id')) return redirect()->route('login'); return view('settings'); });
-Route::get('/bookmarks', function () { if (!session()->has('user_id')) return redirect()->route('login'); return view('bookmarks'); });
-Route::get('/notifications', function () { if (!session()->has('user_id')) return redirect()->route('login'); return view('notifications'); });
-Route::get('/profile/edit', function () { if (!session()->has('user_id')) return redirect()->route('login'); return view('edit'); });
+// Simple pages - with profile picture loading
+Route::get('/settings', function () { 
+  if (!session()->has('user_id')) return redirect()->route('login'); 
+  $userId = session('user_id');
+  $user = DB::table('users')->select('profile_picture')->where('id', $userId)->first();
+  $profilePicture = $user->profile_picture ?? null;
+  if ($profilePicture && !str_starts_with($profilePicture, 'http')) {
+    $profilePicture = url('/') . '/' . $profilePicture;
+  }
+  return view('settings', ['profile_picture' => $profilePicture]); 
+});
+Route::get('/bookmarks', function () { 
+  if (!session()->has('user_id')) return redirect()->route('login'); 
+  $userId = session('user_id');
+  $user = DB::table('users')->select('profile_picture')->where('id', $userId)->first();
+  $profilePicture = $user->profile_picture ?? null;
+  if ($profilePicture && !str_starts_with($profilePicture, 'http')) {
+    $profilePicture = url('/') . '/' . $profilePicture;
+  }
+  return view('bookmarks', ['profile_picture' => $profilePicture]); 
+});
+Route::get('/notifications', function () { 
+  if (!session()->has('user_id')) return redirect()->route('login'); 
+  $userId = session('user_id');
+  $user = DB::table('users')->select('profile_picture')->where('id', $userId)->first();
+  $profilePicture = $user->profile_picture ?? null;
+  if ($profilePicture && !str_starts_with($profilePicture, 'http')) {
+    $profilePicture = url('/') . '/' . $profilePicture;
+  }
+  return view('notifications', ['profile_picture' => $profilePicture]); 
+});
+Route::get('/profile/edit', function () { 
+  if (!session()->has('user_id')) return redirect()->route('login'); 
+  $userId = session('user_id');
+  $user = DB::table('users')->select('profile_picture')->where('id', $userId)->first();
+  $profilePicture = $user->profile_picture ?? null;
+  if ($profilePicture && !str_starts_with($profilePicture, 'http')) {
+    $profilePicture = url('/') . '/' . $profilePicture;
+  }
+  return view('edit', ['profile_picture' => $profilePicture]); 
+});
 
 // API routes using web middleware (session)
 Route::prefix('api')->group(function () {
@@ -69,3 +112,9 @@ Route::match(['get','post'], '/api-edit-scholarship.php', [ApiController::class,
 
 // Back-compat logout
 Route::get('/logout.php', [AuthController::class, 'logout']);
+
+// Back-compat forgot password
+Route::get('/forgotpassword.php', function () { return redirect()->route('forgot-password'); });
+Route::post('/forgotpassword.php', [AuthController::class, 'forgotPassword']);
+Route::get('/resetpassword.php', [AuthController::class, 'showResetPasswordForm']);
+Route::post('/resetpassword.php', [AuthController::class, 'resetPassword']);

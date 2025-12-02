@@ -13,17 +13,17 @@
 <body>
   <div class="dashboard d-flex">
     <!-- Mobile Menu Toggle Button -->
-    <button class="sidebar-toggle d-md-none" id="mobileMenuToggle" style="display: none;">
+    <button class="sidebar-toggle d-md-none" id="mobileMenuToggle">
       <i class="bi bi-list" style="font-size: 24px; color: white;"></i>
     </button>
     
     <!-- Overlay for mobile -->
-    <div class="sidebar-overlay d-md-none" id="sidebarOverlay" style="display: none;"></div>
+    <div class="sidebar-overlay d-md-none" id="sidebarOverlay"></div>
     
     <aside class="sidebar d-flex flex-column align-items-center p-3" id="sidebar">
       <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo mb-4 sidebar-logo">
       <div class="profile text-center mb-4">
-        <img src="{{ asset('assets/Images/profile.png') }}" alt="Profile" class="profile-img mb-2 big-circle">
+        <img src="{{ $profile_picture ?? asset('assets/Images/profile.png') }}" alt="Profile" class="profile-img mb-2 big-circle" onerror="this.src='{{ asset('assets/Images/profile.png') }}'">
         <h2 id="sidebarName" class="h5 fw-bold">{{ session('username') }}</h2>
         <p class="small mb-2">STUDENT</p>
         <a class="btn btn-primary rounded-pill" href="{{ url('/profile/edit') }}">Edit Profile</a>
@@ -87,29 +87,71 @@
       const mobileToggle = document.getElementById('mobileMenuToggle');
       const sidebarOverlay = document.getElementById('sidebarOverlay');
       
-      if (mobileToggle && sidebarOverlay) {
-        mobileToggle.addEventListener('click', function() {
+      // Initialize: ensure overlay is hidden on page load
+      if (sidebarOverlay) {
+        sidebarOverlay.classList.remove('active');
+        sidebarOverlay.style.display = 'none';
+        sidebarOverlay.style.pointerEvents = 'none';
+      }
+      if (sidebar) {
+        sidebar.classList.remove('active');
+      }
+      
+      function openMobileMenu() {
+        if (sidebar && sidebarOverlay) {
           sidebar.classList.add('active');
+          sidebarOverlay.classList.add('active');
           sidebarOverlay.style.display = 'block';
+          sidebarOverlay.style.pointerEvents = 'auto';
           document.body.style.overflow = 'hidden';
-        });
-        
-        sidebarOverlay.addEventListener('click', function() {
+          if (mobileToggle) {
+            mobileToggle.style.display = 'none';
+          }
+        }
+      }
+      
+      function closeMobileMenu() {
+        if (sidebar && sidebarOverlay) {
           sidebar.classList.remove('active');
+          sidebarOverlay.classList.remove('active');
           sidebarOverlay.style.display = 'none';
+          sidebarOverlay.style.pointerEvents = 'none';
           document.body.style.overflow = '';
+          if (mobileToggle) {
+            mobileToggle.style.display = 'flex';
+          }
+        }
+      }
+      
+      if (mobileToggle && sidebarOverlay) {
+        mobileToggle.addEventListener('click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          if (sidebar && sidebar.classList.contains('active')) {
+            closeMobileMenu();
+          } else {
+            openMobileMenu();
+          }
         });
         
-        const navLinks = sidebar.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-          link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-              sidebar.classList.remove('active');
-              sidebarOverlay.style.display = 'none';
-              document.body.style.overflow = '';
-            }
-          });
+        sidebarOverlay.addEventListener('click', function(e) {
+          e.stopPropagation();
+          closeMobileMenu();
         });
+        
+        if (sidebar) {
+          const navLinks = sidebar.querySelectorAll('.nav-link');
+          navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+              // Allow navigation to proceed immediately, close menu asynchronously
+              if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                  closeMobileMenu();
+                }, 0);
+              }
+            });
+          });
+        }
       }
       
       const toggle = document.querySelector('#sidebarToggle');
@@ -126,6 +168,16 @@
           const elContact = document.getElementById('setContact');
           const elSidebar = document.getElementById('sidebarName');
           if (elUser) elUser.value = u; if (elEmail) elEmail.value = e; if (elContact) elContact.value = c; if (elSidebar && u) elSidebar.textContent = u;
+          // Load profile picture
+          if (data.profile_picture) {
+            const imgEl = document.querySelector('.profile-img');
+            if (imgEl) {
+              const profilePicUrl = data.profile_picture.startsWith('http') 
+                ? data.profile_picture 
+                : '{{ url("/") }}/' + data.profile_picture;
+              imgEl.src = profilePicUrl;
+            }
+          }
         }).catch(()=>{});
 
       const accountForm = document.getElementById('accountForm');
