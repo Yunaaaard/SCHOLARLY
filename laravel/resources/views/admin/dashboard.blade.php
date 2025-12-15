@@ -12,6 +12,14 @@
   <style>
     body { font-family: 'Poppins', sans-serif !important; }
     .description-content:empty:before { content: attr(data-placeholder); color: #6c757d; font-style: italic; }
+    
+    /* Success Modal Animation */
+    .modal-success-body { display:flex; flex-direction:column; align-items:center; gap:12px; padding:28px; }
+    .check-svg { width:92px; height:92px; }
+    .check-circle { stroke:#28a745; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; fill:none; stroke-dasharray:180; stroke-dashoffset:180; animation:drawCircle .45s ease forwards; }
+    .check-tick { stroke:#28a745; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; fill:none; stroke-dasharray:60; stroke-dashoffset:60; animation:drawTick .35s .35s ease forwards; }
+    @keyframes drawCircle { to { stroke-dashoffset:0; } }
+    @keyframes drawTick { to { stroke-dashoffset:0; } }
   </style>
 </head>
 <body>
@@ -218,6 +226,22 @@
     </div>
   </div>
 
+  <!-- Success Modal -->
+  <div class="modal fade" id="editSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-body modal-success-body">
+          <svg class="check-svg" viewBox="0 0 52 52" aria-hidden="true">
+            <circle class="check-circle" cx="26" cy="26" r="24"></circle>
+            <path class="check-tick" d="M15 27 L23 34 L38 18"></path>
+          </svg>
+          <h4 class="fw-bold text-success mb-0">Success!</h4>
+          <p class="text-muted mb-0">Scholarship has been updated.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // Logout confirmation
@@ -366,9 +390,18 @@
         .then(r => r.json())
         .then(data => {
           if (data.success) { 
-            alert('Scholarship updated successfully'); 
-            bootstrap.Modal.getInstance(document.getElementById('editScholarshipModal')).hide(); 
-            loadScholarships(); 
+            // Hide edit modal
+            bootstrap.Modal.getInstance(document.getElementById('editScholarshipModal')).hide();
+            
+            // Show success modal
+            const successModal = new bootstrap.Modal(document.getElementById('editSuccessModal'));
+            successModal.show();
+            
+            // Auto close after 2 seconds and reload
+            setTimeout(() => {
+              successModal.hide();
+              loadScholarships();
+            }, 2000);
           } else { 
             const errorMsg = data.error || (data.errors && Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors)) || 'Unknown error';
             alert('Failed to update scholarship: ' + errorMsg); 
