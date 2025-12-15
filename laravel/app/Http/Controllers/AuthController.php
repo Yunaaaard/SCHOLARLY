@@ -39,6 +39,8 @@ class AuthController extends Controller
         if ($user && Hash::check($password, $user->password)) {
             Session::put('user_id', $user->id);
             Session::put('username', $user->username);
+            Session::put('first_name', $user->first_name ?? '');
+            Session::put('last_name', $user->last_name ?? '');
             Session::put('email', $user->email);
 
             return redirect()->intended(route('dashboard'));

@@ -24,7 +24,7 @@
       <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo mb-4 sidebar-logo">
       <div class="profile text-center mb-4">
         <img src="{{ $profile_picture ?? asset('assets/Images/profile.png') }}" alt="Profile" class="profile-img mb-2 big-circle" onerror="this.src='{{ asset('assets/Images/profile.png') }}'">
-        <h2 id="sidebarName" class="h5 fw-bold">{{ session('username') }}</h2>
+        <h2 id="sidebarName" class="h5 fw-bold" style="opacity: 0; transition: opacity 0.2s;">{{ session('username') }}</h2>
         <p class="small mb-2">STUDENT</p>
         <a class="btn btn-primary rounded-pill" href="{{ url('/profile/edit') }}">Edit Profile</a>
       </div>
@@ -33,7 +33,7 @@
         <a href="{{ route('dashboard') }}" class="nav-link d-flex align-items-center gap-2 text-white"><i class="bi bi-house-door"></i> Home</a>
         <a href="{{ url('/settings') }}" class="nav-link d-flex align-items-center gap-2 text-white"><i class="bi bi-gear"></i> Settings</a>
         <a href="{{ url('/bookmarks') }}" class="nav-link d-flex align-items-center gap-2 text-white"><i class="bi bi-bookmark"></i> Bookmarks</a>
-        <a href="{{ route('logout') }}" class="nav-link d-flex align-items-center gap-2 text-white"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        <a href="#" id="logoutBtn" class="nav-link d-flex align-items-center gap-2 text-white"><i class="bi bi-box-arrow-right"></i> Logout</a>
       </nav>
       <button class="sidebar-toggle d-none d-md-flex" id="sidebarToggle">
         <img src="{{ asset('assets/Images/left_arrow.png') }}" alt="Toggle Sidebar" class="arrow-icon">
@@ -79,8 +79,45 @@
       </div>
     </main>
   </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="logoutModalLabel">
+            <i class="bi bi-box-arrow-right me-2 text-warning"></i>Logout Confirmation
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center py-4">
+          <div class="mb-3">
+            <i class="bi bi-exclamation-circle text-warning" style="font-size: 3rem;"></i>
+          </div>
+          <p class="fs-5 mb-2">Are you sure you want to logout?</p>
+          <p class="text-muted small">You will need to login again to access your account.</p>
+        </div>
+        <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+          <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </button>
+          <a href="{{ route('logout') }}" class="btn btn-danger px-4">
+            <i class="bi bi-box-arrow-right me-1"></i>Yes, Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Logout confirmation
+    document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
+      e.preventDefault();
+      const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+      logoutModal.show();
+    });
+
     // Mobile menu functionality
     (function() {
       const sidebar = document.querySelector('.sidebar');
@@ -154,8 +191,15 @@
         }
       }
       
+      // Desktop sidebar toggle
       const toggle = document.querySelector('#sidebarToggle');
-      if (toggle) toggle.addEventListener('click', ()=>{ sidebar.classList.toggle('collapsed'); });
+      if (toggle && sidebar) {
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          sidebar.classList.toggle('collapsed');
+        });
+      }
     })();
     
     document.addEventListener('DOMContentLoaded', function(){
@@ -167,7 +211,17 @@
           const elEmail = document.getElementById('setEmail');
           const elContact = document.getElementById('setContact');
           const elSidebar = document.getElementById('sidebarName');
-          if (elUser) elUser.value = u; if (elEmail) elEmail.value = e; if (elContact) elContact.value = c; if (elSidebar && u) elSidebar.textContent = u;
+          if (elUser) elUser.value = u; if (elEmail) elEmail.value = e; if (elContact) elContact.value = c;
+          // Update sidebar name with full name if available
+          if (elSidebar) {
+            if (data.first_name && data.last_name) {
+              elSidebar.textContent = data.first_name + ' ' + data.last_name;
+            } else if (u) {
+              elSidebar.textContent = u;
+            }
+            // Fade in the name after it's been set
+            elSidebar.style.opacity = '1';
+          }
           // Load profile picture
           if (data.profile_picture) {
             const imgEl = document.querySelector('.profile-img');

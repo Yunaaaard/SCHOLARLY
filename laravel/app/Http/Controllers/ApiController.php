@@ -370,7 +370,8 @@ class ApiController extends Controller
         if ($request->isMethod('post')) {
             // Handle profile updates
             $request->validate([
-                'username' => 'required|string|min:3',
+                'first_name' => 'nullable|string|min:2',
+                'last_name' => 'nullable|string|min:2',
                 'email' => 'required|email',
                 'contact' => 'required|string',
                 'password' => 'nullable|min:6',
@@ -378,10 +379,20 @@ class ApiController extends Controller
             ]);
 
             $data = [
-                'username' => $request->input('username'),
                 'email' => $request->input('email'),  
                 'contact' => $request->input('contact'),
             ];
+            
+            // Only update name fields if provided
+            if ($request->filled('first_name') && $request->filled('last_name')) {
+                $firstName = $request->input('first_name');
+                $lastName = $request->input('last_name');
+                $fullName = $firstName . ' ' . $lastName;
+                
+                $data['first_name'] = $firstName;
+                $data['last_name'] = $lastName;
+                $data['name'] = $fullName;
+            }
             
             // Don't include updated_at as legacy table may not have it
 
@@ -398,18 +409,23 @@ class ApiController extends Controller
 
             DB::table('users')->where('id', $userId)->update($data);
 
-            Session::put('username', $data['username']);
+            if (isset($data['first_name'])) {
+                Session::put('first_name', $data['first_name']);
+                Session::put('last_name', $data['last_name']);
+            }
             Session::put('email', $data['email']);
 
             return response()->json(['success' => true]);
         }
 
         $user = DB::table('users')
-            ->select('username', 'email', 'contact', 'profile_picture')
+            ->select('first_name', 'last_name', 'username', 'email', 'contact', 'profile_picture')
             ->where('id', $userId)
             ->first();
 
         return response()->json([
+            'first_name' => $user->first_name ?? '',
+            'last_name' => $user->last_name ?? '',
             'username' => $user->username ?? '',
             'email' => $user->email ?? '',
             'contact' => $user->contact ?? '',
