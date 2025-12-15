@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
@@ -374,7 +375,8 @@ class ApiController extends Controller
                 'last_name' => 'nullable|string|min:2',
                 'email' => 'required|email',
                 'contact' => 'required|string',
-                'password' => 'nullable|min:6',
+                'password' => 'nullable|min:8',
+                'current_password' => 'nullable|string',
                 'profilePic' => 'nullable|image|max:5120' // 5MB
             ]);
 
@@ -396,7 +398,27 @@ class ApiController extends Controller
             
             // Don't include updated_at as legacy table may not have it
 
+            // Handle password change with current password verification
             if ($request->filled('password')) {
+                // If changing password, current password must be provided and verified
+                if ($request->input('action') === 'change_password') {
+                    if (!$request->filled('current_password')) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'Current password is required to change password.'
+                        ], 400);
+                    }
+                    
+                    // Verify current password
+                    $user = DB::table('users')->where('id', $userId)->first();
+                    if (!$user || !Hash::check($request->input('current_password'), $user->password)) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'Current password is incorrect.'
+                        ], 400);
+                    }
+                }
+                
                 $data['password'] = bcrypt($request->input('password'));
             }
 

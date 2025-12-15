@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scholarly Settings</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}?v={{ time() }}">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
@@ -63,21 +63,66 @@
         </div>
         <div class="mb-4 pb-3 border-bottom">
           <h5 class="fw-bold">Change Password</h5>
-          <form id="passwordForm">
-            @csrf
-            <div class="mb-3">
-              <label class="form-label">New Password</label>
-              <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Confirm New Password</label>
-              <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
-            </div>
-            <button type="submit" class="btn btn-primary">Update Password</button>
-          </form>
+          <p class="text-muted small mb-3">Click the button below to change your password securely.</p>
+          <button type="button" class="btn btn-primary" id="changePasswordBtn">
+            <i class="bi bi-shield-lock me-2"></i>Change Password
+          </button>
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="changePasswordModalLabel">
+            <i class="bi bi-shield-lock me-2 text-primary"></i>Change Password
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="passwordForm">
+          <div class="modal-body py-4">
+            @csrf
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+              <i class="bi bi-info-circle me-2"></i>
+              <small>You need to verify your current password before changing it.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Current Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                <input type="password" class="form-control" id="currentPassword" placeholder="Enter your current password" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">New Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control" id="newPassword" placeholder="Enter new password" required>
+              </div>
+              <small class="text-muted">Password must be at least 8 characters long.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Confirm New Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password" required>
+              </div>
+            </div>
+            <div id="passwordError" class="alert alert-danger d-none" role="alert"></div>
+            <div id="passwordSuccess" class="alert alert-success d-none" role="alert"></div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-circle me-1"></i>Update Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <!-- Logout Confirmation Modal -->
@@ -258,32 +303,74 @@
         });
       }
 
+      // Change Password Modal trigger
+      const changePasswordBtn = document.getElementById('changePasswordBtn');
+      if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', function() {
+          const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+          changePasswordModal.show();
+        });
+      }
+
+      // Password Form submission
       const passwordForm = document.getElementById('passwordForm');
       if (passwordForm) {
         passwordForm.addEventListener('submit', function(ev){
           ev.preventDefault();
+          const currentPassword = document.getElementById('currentPassword').value.trim();
           const newPassword = document.getElementById('newPassword').value.trim();
           const confirmPassword = document.getElementById('confirmPassword').value.trim();
-          if (!newPassword) return showPasswordAlert('Please enter a new password.', 'danger');
-          if (newPassword !== confirmPassword) return showPasswordAlert('Passwords do not match.', 'danger');
-          if (newPassword.length < 6) return showPasswordAlert('Password must be at least 6 characters long.', 'danger');
+          
+          // Hide previous alerts
+          document.getElementById('passwordError').classList.add('d-none');
+          document.getElementById('passwordSuccess').classList.add('d-none');
+          
+          // Validation
+          if (!currentPassword) return showPasswordModalAlert('Please enter your current password.', 'error');
+          if (!newPassword) return showPasswordModalAlert('Please enter a new password.', 'error');
+          if (newPassword !== confirmPassword) return showPasswordModalAlert('New passwords do not match.', 'error');
+          if (newPassword.length < 8) return showPasswordModalAlert('Password must be at least 8 characters long.', 'error');
+          if (currentPassword === newPassword) return showPasswordModalAlert('New password must be different from current password.', 'error');
+          
           const fd = new FormData();
           fd.append('_token', '{{ csrf_token() }}');
+          fd.append('current_password', currentPassword);
           fd.append('password', newPassword);
           fd.append('username', document.getElementById('setUsername').value.trim());
           fd.append('email', document.getElementById('setEmail').value.trim());
           fd.append('contact', document.getElementById('setContact').value.trim());
           fd.append('action', 'change_password');
+          
           fetch('{{ url('api/user-profile') }}', { method: 'POST', credentials: 'same-origin', body: fd })
             .then(r => r.json().then(j => ({ ok: r.ok, body: j })))
-            .then(res => { if (res.ok && res.body.success) { showPasswordAlert('Password updated successfully.', 'success'); passwordForm.reset(); } else { showPasswordAlert(res.body && res.body.error ? res.body.error : 'Password update failed', 'danger'); } })
-            .catch(()=> showPasswordAlert('Network error. Please try again.', 'danger'));
+            .then(res => { 
+              if (res.ok && res.body.success) { 
+                showPasswordModalAlert('Password updated successfully! The modal will close shortly.', 'success'); 
+                passwordForm.reset();
+                setTimeout(() => {
+                  bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                }, 2000);
+              } else { 
+                showPasswordModalAlert(res.body && res.body.error ? res.body.error : 'Password update failed', 'error'); 
+              } 
+            })
+            .catch(()=> showPasswordModalAlert('Network error. Please try again.', 'error'));
         });
       }
 
-      function showPasswordAlert(message, type) {
-        const oldAlert = document.querySelector('#passwordForm .alert'); if (oldAlert) oldAlert.remove();
-        const alertDiv = document.createElement('div'); alertDiv.className = 'alert mt-3 alert-' + type; alertDiv.textContent = message; passwordForm.appendChild(alertDiv); setTimeout(()=> alertDiv.remove(), 3000);
+      function showPasswordModalAlert(message, type) {
+        const errorDiv = document.getElementById('passwordError');
+        const successDiv = document.getElementById('passwordSuccess');
+        
+        if (type === 'error') {
+          errorDiv.textContent = message;
+          errorDiv.classList.remove('d-none');
+          successDiv.classList.add('d-none');
+        } else {
+          successDiv.textContent = message;
+          successDiv.classList.remove('d-none');
+          errorDiv.classList.add('d-none');
+        }
       }
     });
   </script>
