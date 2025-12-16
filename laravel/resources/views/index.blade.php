@@ -8,13 +8,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scholarly - Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
+  <link rel="stylesheet" href="/assets/css/home.css">
 </head>
 <body>
-  <div style="min-height: 100vh; display: flex; flex-direction: column; background-image: url('{{ asset('assets/Images/HOME PAGE.png') }}'); background-size: cover; background-position: center;">
+  <div style="min-height: 100vh; display: flex; flex-direction: column; background-image: url('/assets/Images/HOME PAGE.png'); background-size: cover; background-position: center;">
     <div class="navbar">
       <div class="nav-left">
-        <img src="{{ asset('assets/Images/Group 44.png') }}" alt="Scholarly Logo"/>
+        <img src="/assets/Images/Group 44.png" alt="Scholarly Logo"/>
       </div>
       <div class="nav-right">
         <a href="/" class="nav-btn">Home</a>
