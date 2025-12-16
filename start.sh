@@ -16,11 +16,31 @@ mkdir -p storage/framework/views
 mkdir -p storage/framework/cache
 mkdir -p storage/logs
 
-echo "Testing database connection..."
-php artisan db:show || echo "Database connection failed - check your DB variables"
+echo "=== DATABASE CONFIGURATION DEBUG ==="
+echo "DB_CONNECTION: $DB_CONNECTION"
+echo "DB_HOST: $DB_HOST"
+echo "DB_PORT: $DB_PORT"
+echo "DB_DATABASE: $DB_DATABASE"
+echo "DB_USERNAME: $DB_USERNAME"
+echo "DB_PASSWORD: ${DB_PASSWORD:0:5}..." 
 
+echo ""
+echo "Testing database connection..."
+if php artisan db:show; then
+    echo "✓ Database connection successful!"
+else
+    echo "✗ Database connection FAILED - check your DB variables"
+    echo "Attempting to continue anyway..."
+fi
+
+echo ""
 echo "Running migrations..."
-php artisan migrate --force || echo "Migration failed - check database credentials"
+if php artisan migrate --force; then
+    echo "✓ Migrations completed successfully!"
+else
+    echo "✗ Migration FAILED"
+    echo "Attempting to continue anyway..."
+fi
 
 echo "Clearing and caching config..."
 php artisan config:clear
