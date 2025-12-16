@@ -64,6 +64,5 @@ php artisan storage:link || echo "Storage link already exists"
 echo "Setting up assets..."
 chmod -R 755 public
 
-echo "Starting server..."
-cd public
-php -S 0.0.0.0:${PORT:-8080}
+echo "Starting server with router for static assets..."
+php -S 0.0.0.0:${PORT:-8080} -t public public/router.php
