@@ -26,6 +26,11 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Terms and Conditions
+Route::get('/terms-and-conditions', function () {
+    return view('terms-and-conditions');
+})->name('terms');
+
 // Admin
 Route::get('/admin', [AdminController::class, 'index'])->name('admin');
 Route::get('/admin-dashboard.php', function () { return redirect()->route('admin'); });

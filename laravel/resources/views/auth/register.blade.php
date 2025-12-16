@@ -23,10 +23,10 @@
     .signup-form { width: 100%; max-width: 360px; }
     .signup-form h3 { text-align: center; font-weight: 600; margin-bottom: 10px; }
     .signup-form p.text-muted { text-align: center; margin-bottom: 25px; font-size: 0.95rem; }
-    .input-group { background: #fff; border-radius: 8px; box-shadow: 0px 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
+    .input-group { background: #fff; border-radius: 8px; box-shadow: 0px 2px 4px rgba(0,0,0,0.05); overflow: visible; position: relative; }
     .input-group-text { background: transparent; border: none; padding-left: 15px; }
-    .form-control { border: none; box-shadow: none !important; padding: 0.9rem; font-size: 0.95rem; }
-    .toggle-eye { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #8E79E0; cursor: pointer; }
+    .form-control { border: none; box-shadow: none !important; padding: 0.9rem; font-size: 0.95rem; padding-right: 45px; }
+    .toggle-eye { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #8E79E0; cursor: pointer; z-index: 10; pointer-events: auto; }
     .btn { background-color: #8E79E0; color: white; font-weight: 600; border-radius: 25px; padding: 0.7rem; margin-top: 10px; }
     .btn:hover { background-color: #7b68ce; }
     .form-check-label { font-size: 0.9rem; color: #555; }
@@ -41,6 +41,11 @@
     .signup-text { text-align: center; font-size: 0.9rem; margin-top: 10px; }
     .signup-text a { color: #7b68ce; text-decoration: none; font-weight: 500; }
     .signup-text a:hover { text-decoration: underline; }
+    .terms-container { text-align: center; margin: 20px 0; }
+    .terms-container .form-check { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .terms-container .form-check-input { width: 18px; height: 18px; cursor: pointer; border: 2px solid #8E79E0; margin: 0; }
+    .terms-container .form-check-input:checked { background-color: #8E79E0; border-color: #8E79E0; }
+    .terms-container .form-check-label { margin: 0; cursor: pointer; }
     @media (max-width: 768px) { 
       .left, .right { width: 100%; height: auto; min-height: 50vh; } 
       .left { order: 1; padding: 2rem 1rem; } 
@@ -99,11 +104,13 @@
             <span class="toggle-eye"><i class="bi bi-eye"></i></span>
           </div>
 
-          <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
-            <label class="form-check-label" for="terms">
-              I agree to <a href="#">Terms and Conditions</a>.
-            </label>
+          <div class="terms-container">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+              <label class="form-check-label" for="terms">
+                I agree to <a href="{{ route('terms') }}" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>.
+              </label>
+            </div>
           </div>
 
           @if ($errors->any())
@@ -112,12 +119,6 @@
 
           <button type="submit" class="btn w-100">SIGN UP</button>
           <p class="signup-text">Already have an account? <a href="{{ route('login') }}">Sign in here</a></p>
-
-          <div class="divider"><span>OR</span></div>
-          <div class="social-login text-center">
-            <a href="#"><img src="{{ asset('assets/images/ic_outline-facebook.png') }}" alt="Facebook"></a>
-            <a href="#"><img src="{{ asset('assets/images/ri_google-fill.png') }}" alt="Google"></a>
-          </div>
         </form>
       </div>
     </div>

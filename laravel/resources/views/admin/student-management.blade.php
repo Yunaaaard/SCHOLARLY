@@ -11,7 +11,293 @@
   <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}">
   <style>
     * { font-family: 'Poppins', sans-serif !important; }
-    .search-input { max-width: 280px; }
+    
+    /* Search Bar Styling */
+    .search-container {
+      position: relative;
+      max-width: 400px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 50px;
+      font-size: 0.9375rem;
+      transition: all 0.3s ease;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+      background: white;
+    }
+    
+    .search-input::placeholder {
+      color: #a0aec0;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      transition: stroke 0.3s ease;
+    }
+    
+    .search-container:focus-within .search-icon {
+      stroke: #667eea;
+    }
+    
+    /* Improved Table Styles */
+    .table-responsive {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    
+    .table {
+      margin-bottom: 0;
+    }
+    
+    .table thead {
+      background: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+    }
+    
+    .table thead th {
+      color: #000000;
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 1rem;
+      border: none;
+      white-space: nowrap;
+    }
+    
+    .table tbody td {
+      padding: 1rem;
+      vertical-align: middle;
+      color: #333;
+      font-size: 0.9375rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .table tbody tr {
+      transition: all 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+      background-color: #f8f9ff;
+      transform: scale(1.01);
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    }
+    
+    .table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .student-id {
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .student-name {
+      font-weight: 500;
+      color: #2d3748;
+    }
+    
+    .student-email {
+      color: #718096;
+      font-size: 0.875rem;
+    }
+    
+    .student-contact {
+      color: #4a5568;
+    }
+    
+    .btn-action {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+    }
+    
+    .btn-view {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-view:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+    
+    .btn-delete {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+    
+    .btn-delete:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+      color: white;
+    }
+    
+    .btn-action i {
+      font-size: 0.875rem;
+      margin-right: 0.25rem;
+    }
+    
+    /* Modal Improvements */
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      border-bottom: none;
+      padding: 1.5rem 2rem;
+    }
+    
+    .modal-header .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+    }
+    
+    .modal-header .btn-close:hover {
+      opacity: 1;
+    }
+    
+    .modal-body {
+      padding: 2rem;
+      line-height: 1.8;
+    }
+    
+    .modal-body p {
+      margin-bottom: 1rem;
+      font-size: 0.9375rem;
+    }
+    
+    .modal-body p strong {
+      color: #667eea;
+      font-weight: 600;
+      min-width: 120px;
+      display: inline-block;
+    }
+    
+    .modal-body h6 {
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      color: #2d3748;
+      font-weight: 600;
+    }
+    
+    .modal-body ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .modal-body ul li {
+      padding: 0.5rem 1rem;
+      margin-bottom: 0.5rem;
+      background: #f8f9ff;
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+    }
+    
+    .modal-body ul li.text-muted {
+      background: #f7fafc;
+      border-left-color: #cbd5e0;
+      color: #718096;
+    }
+    
+    .modal-footer {
+      border-top: 1px solid #e2e8f0;
+      padding: 1.25rem 2rem;
+      background: #f8f9fa;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+    
+    /* Logout Modal - Different Style */
+    #logoutModal .modal-content {
+      border-radius: 20px;
+      border: none;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    #logoutModal .modal-header {
+      background: white;
+      color: #2d3748;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1.5rem;
+    }
+    
+    #logoutModal .modal-header .modal-title {
+      color: #2d3748;
+      font-size: 1.25rem;
+    }
+    
+    #logoutModal .modal-header .btn-close {
+      filter: none;
+      opacity: 0.5;
+    }
+    
+    #logoutModal .modal-body {
+      background: white;
+      padding: 2rem;
+    }
+    
+    #logoutModal .modal-footer {
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      padding: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+      .table thead th,
+      .table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8125rem;
+      }
+      
+      .btn-action {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8125rem;
+      }
+      
+      .modal-body {
+        padding: 1.5rem;
+      }
+      
+      .modal-header {
+        padding: 1.25rem 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -51,15 +337,15 @@
     <main class="main-content flex-grow-1 p-4">
       <h4 class="fw-bold mb-3">Student Management</h4>
 
-      <form class="search-container position-relative d-inline-block mb-4" method="GET" action="{{ route('admin.students') }}">
+      <form class="search-container" method="GET" action="{{ route('admin.students') }}">
         <svg xmlns="http://www.w3.org/2000/svg" 
              viewBox="0 0 24 24" 
              fill="none" 
-             stroke="#777" 
+             stroke="#a0aec0" 
              stroke-width="2" 
              stroke-linecap="round" 
              stroke-linejoin="round" 
-             class="search-icon position-absolute" style="top: 50%; left: 12px; transform: translateY(-50%); width: 18px; height: 18px;">
+             class="search-icon">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
@@ -67,8 +353,8 @@
           type="text" 
           name="q" 
           value="{{ $query }}" 
-          placeholder="Search students..." 
-          class="search-input ps-5 form-control"
+          placeholder="Search by name, email, or contact..." 
+          class="search-input"
         >
       </form>
 
@@ -87,19 +373,26 @@
             @if($students->count() > 0)
               @foreach($students as $student)
                 <tr>
-                  <td>{{ $student->id }}</td>
-                  <td>{{ $student->username }}</td>
-                  <td>{{ $student->email }}</td>
-                  <td>{{ $student->contact }}</td>
+                  <td class="student-id">#{{ $student->id }}</td>
+                  <td class="student-name">{{ $student->first_name }} {{ $student->last_name }}</td>
+                  <td class="student-email">{{ $student->email }}</td>
+                  <td class="student-contact">{{ $student->contact ?? 'N/A' }}</td>
                   <td class="text-center">
-                    <button class="btn btn-sm btn-primary me-2 view-btn" data-id="{{ $student->id }}"><i class="bi bi-eye"></i> View</button>
-                    <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $student->id }}"><i class="bi bi-trash"></i> Delete</button>
+                    <button class="btn btn-action btn-view me-2 view-btn" data-id="{{ $student->id }}">
+                      <i class="bi bi-eye-fill"></i> View
+                    </button>
+                    <button class="btn btn-action btn-delete delete-btn" data-id="{{ $student->id }}">
+                      <i class="bi bi-trash-fill"></i> Delete
+                    </button>
                   </td>
                 </tr>
               @endforeach
             @else
               <tr>
-                <td colspan="5" class="text-center text-muted">No students found.</td>
+                <td colspan="5" class="text-center text-muted py-5">
+                  <i class="bi bi-inbox" style="font-size: 3rem; color: #cbd5e0;"></i>
+                  <p class="mt-2 mb-0">No students found.</p>
+                </td>
               </tr>
             @endif
           </tbody>
@@ -126,16 +419,22 @@
   <!-- Delete Modal -->
   <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content text-center p-3">
-        <i class="bi bi-exclamation-triangle text-danger" style="font-size:2rem;"></i>
-        <h5 class="fw-bold mt-2">Confirm Deletion</h5>
-        <p>Are you sure you want to delete this student?</p>
-        <div class="d-flex justify-content-center gap-3">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <form id="deleteForm" method="POST" action="{{ route('admin.students.delete') }}">
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          <h5 class="modal-title fw-bold">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center" style="padding: 2.5rem 2rem;">
+          <i class="bi bi-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+          <h5 class="fw-bold mt-3 mb-3">Are you sure?</h5>
+          <p class="text-muted mb-0">This action cannot be undone. The student and all related data will be permanently deleted.</p>
+        </div>
+        <div class="modal-footer" style="justify-content: center; gap: 1rem;">
+          <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+          <form id="deleteForm" method="POST" action="{{ route('admin.students.delete') }}" style="margin: 0;">
             @csrf
             <input type="hidden" name="id" id="deleteId">
-            <button type="submit" class="btn btn-danger">Delete</button>
+            <button type="submit" class="btn btn-danger px-4">Delete Student</button>
           </form>
         </div>
       </div>
@@ -202,13 +501,15 @@
             } else {
               let scholarships = data.scholarships && data.scholarships.length > 0
                 ? data.scholarships.map(s => `<li>${s}</li>`).join('')
-                : '<li class="text-muted">No scholarships applied</li>';
+                : '<li class="text-muted">No scholarships bookmarked</li>';
               
               studentDetails.innerHTML = `
-                <p><strong>Name:</strong> ${data.username}</p>
+                <p><strong>First Name:</strong> ${data.first_name || 'N/A'}</p>
+                <p><strong>Last Name:</strong> ${data.last_name || 'N/A'}</p>
+                <p><strong>Username:</strong> ${data.username}</p>
                 <p><strong>Email:</strong> ${data.email}</p>
                 <p><strong>Contact:</strong> ${data.contact || 'N/A'}</p>
-                <h6 class="fw-bold mt-3">Scholarships Applied:</h6>
+                <h6 class="fw-bold mt-3">Scholarships Bookmarked:</h6>
                 <ul>${scholarships}</ul>
               `;
             }

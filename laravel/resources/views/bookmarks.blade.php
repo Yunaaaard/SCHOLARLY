@@ -65,9 +65,6 @@
   <div id="scholarshipModal" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
         <div class="modal-body">
           <div class="scholarship-detail">
             <div class="scholarship-header d-flex align-items-center gap-3 mb-4">
@@ -91,7 +88,6 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary btn-apply" id="applyBtn">APPLY</button>
         </div>
       </div>
     </div>
@@ -428,7 +424,6 @@
           const date = (data.start_date && data.end_date) ? `${data.start_date} - ${data.end_date}` : 'N/A';
           document.getElementById('modalDate').textContent = date;
           document.getElementById('modalContact').textContent = data.email || data.phone || 'N/A';
-          const applyBtn = document.getElementById('applyBtn'); if (applyBtn) applyBtn.style.display = 'none';
           new bootstrap.Modal(document.getElementById('scholarshipModal')).show();
         }).catch(()=> alert('Failed to load scholarship details'));
     }

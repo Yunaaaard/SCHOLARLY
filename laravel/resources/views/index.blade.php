@@ -7,6 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scholarly - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
 </head>
 <body>
@@ -35,10 +36,7 @@
     </div>
 
     <footer class="footer" style="text-align:center; padding:1rem; background:rgba(0,0,0,0.5); color:#fff; margin-top:auto;">
-      © 2025 Scholarly. All rights reserved. |
-      <a href="about.html" style="color:#fff; text-decoration:none; margin:0 8px;">About</a>
-      <a href="contact.html" style="color:#fff; text-decoration:none; margin:0 8px;">Contact</a>
-      <a href="privacy.html" style="color:#fff; text-decoration:none; margin:0 8px;">Privacy Policy</a>
+      © 2025 Scholarly. All rights reserved.
     </footer>
   </div>
 </body>

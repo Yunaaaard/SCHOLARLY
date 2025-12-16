@@ -78,9 +78,6 @@
   <div id="scholarshipModal" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
         <div class="modal-body">
           <div class="scholarship-detail">
             <div class="scholarship-header d-flex align-items-center gap-3 mb-4">
@@ -112,7 +109,6 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary btn-apply" id="applyBtn">APPLY</button>
         </div>
       </div>
     </div>
@@ -157,16 +153,24 @@
     });
 
     (function() {
-fetch('{{ url('api/user-profile') }}', { credentials: 'same-origin' })
-        .then(r => r.ok ? r.json() : Promise.reject())
+      console.log('[USER] Fetching user profile data...');
+      fetch('{{ url('api/user-profile') }}', { credentials: 'same-origin' })
+        .then(r => {
+          console.log('[USER] Profile response status:', r.status);
+          return r.ok ? r.json() : Promise.reject('Profile fetch failed');
+        })
         .then(data => {
+          console.log('[USER] Profile data received:', data);
+          
           // Update name: show full name if available, otherwise username
           const sidebarName = document.getElementById('sidebarName');
           if (sidebarName) {
             if (data.first_name && data.last_name) {
               sidebarName.textContent = data.first_name + ' ' + data.last_name;
+              console.log('[USER] Name set to:', data.first_name + ' ' + data.last_name);
             } else if (data.username) {
               sidebarName.textContent = data.username;
+              console.log('[USER] Name set to username:', data.username);
             }
             // Fade in the name after it's been set
             sidebarName.style.opacity = '1';
@@ -181,16 +185,29 @@ fetch('{{ url('api/user-profile') }}', { credentials: 'same-origin' })
               // Only update if different to prevent flash
               if (imgEl.src !== profilePicUrl && imgEl.src !== '{{ url("/") }}/' + data.profile_picture) {
                 imgEl.src = profilePicUrl;
+                console.log('[USER] Profile picture updated');
               }
             }
           }
-        }).catch(() => {});
+        }).catch((error) => {
+          console.error('[USER] Failed to fetch profile:', error);
+        });
 
-fetch('{{ url('api/scholarships') }}', { credentials: 'same-origin' })
-        .then(r => r.ok ? r.json() : Promise.reject())
+      console.log('[DATA] Fetching scholarships from API...');
+      fetch('{{ url('api/scholarships') }}', { credentials: 'same-origin' })
+        .then(r => {
+          console.log('[DATA] Scholarships response status:', r.status);
+          return r.ok ? r.json() : Promise.reject('Scholarships fetch failed');
+        })
         .then(items => {
+          console.log('[DATA] Scholarships received:', items.length, 'scholarships');
+          console.log('[DATA] Scholarship data:', items);
+          
           const wrap = document.getElementById('scholarshipCards');
-          if (!Array.isArray(items) || !wrap) return;
+          if (!Array.isArray(items) || !wrap) {
+            console.warn('[DATA] Invalid data or container not found');
+            return;
+          }
           let allItems = items.slice(0);
           let sortAsc = true;
           let currentCategory = '';
@@ -238,15 +255,30 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
             });
             return filtered;
           }
+          console.log('[RENDER] Initial render complete');
           render(applyFilters());
+          
           const searchEl = document.querySelector('.search-input');
-          if (searchEl) searchEl.addEventListener('input', ()=>{ render(applyFilters()); });
+          if (searchEl) {
+            console.log('[SEARCH] Search input initialized');
+            searchEl.addEventListener('input', ()=>{ 
+              const searchValue = searchEl.value;
+              console.log('[SEARCH] Search input changed:', searchValue);
+              render(applyFilters()); 
+              console.log('[SEARCH] Results filtered');
+            });
+          } else {
+            console.warn('[SEARCH] Search input not found in DOM');
+          }
           
           // Setup sort button
           const sortBtn = document.querySelector('.sort-btn');
           if (sortBtn) {
+            console.log('[SORT] Sort button initialized');
             sortBtn.addEventListener('click', ()=>{ 
               sortAsc=!sortAsc; 
+              console.log('[SORT] Sort button clicked, direction:', sortAsc ? 'Ascending' : 'Descending');
+              
               // Toggle sort icon
               const icon = sortBtn.querySelector('.sort-icon');
               if (icon) {
@@ -254,7 +286,10 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
               }
               sortBtn.classList.toggle('sorting-desc', !sortAsc);
               render(applyFilters()); 
+              console.log('[SORT] Scholarships re-rendered with new sort order');
             });
+          } else {
+            console.warn('[SORT] Sort button not found in DOM');
           }
           
           // Setup filter dropdown
@@ -271,6 +306,8 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
               a.addEventListener('click', function(e) {
                 e.preventDefault();
                 currentCategory = c;
+                console.log('[FILTER] Category selected:', c);
+                
                 // Update active state
                 filterDropdownMenu.querySelectorAll('.dropdown-item').forEach(item => {
                   item.classList.remove('active');
@@ -288,6 +325,7 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
                 const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('filterDropdown'));
                 if (dropdown) dropdown.hide();
                 render(applyFilters());
+                console.log('[FILTER] Scholarships filtered by category:', c);
               });
               li.appendChild(a);
               filterDropdownMenu.appendChild(li);
@@ -298,6 +336,8 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
               allCategoriesItem.addEventListener('click', function(e) {
                 e.preventDefault();
                 currentCategory = '';
+                console.log('[FILTER] All categories selected (filter cleared)');
+                
                 // Update active state
                 filterDropdownMenu.querySelectorAll('.dropdown-item').forEach(item => {
                   item.classList.remove('active');
@@ -315,6 +355,7 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
                 const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('filterDropdown'));
                 if (dropdown) dropdown.hide();
                 render(applyFilters());
+                console.log('[FILTER] Showing all scholarships');
               });
             }
           }
@@ -322,21 +363,37 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
     })();
 
     function toggleBookmark(scholarshipId, iconElement) {
+      console.log('[BOOKMARK] Toggle bookmark clicked for scholarship ID:', scholarshipId);
+      console.log('[BOOKMARK] Icon element:', iconElement);
+      
       fetch('{{ url('api/bookmarks/toggle') }}', {
         method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
         body: JSON.stringify({ scholarship_id: scholarshipId, action: 'toggle' })
-      }).then(r=>r.json()).then(data=>{
+      })
+      .then(r=> {
+        console.log('[BOOKMARK] Response status:', r.status);
+        return r.json();
+      })
+      .then(data=>{
+        console.log('[BOOKMARK] Response data:', data);
         if (data.success) { 
           const icon = iconElement.querySelector('i');
           if (data.bookmarked) { 
+            console.log('[BOOKMARK] Scholarship bookmarked successfully');
             iconElement.classList.add('bookmarked'); 
             icon.className = 'bi bi-bookmark-fill';
           } else { 
+            console.log('[BOOKMARK] Scholarship unbookmarked successfully');
             iconElement.classList.remove('bookmarked'); 
             icon.className = 'bi bi-bookmark';
           }
+        } else {
+          console.error('[BOOKMARK] Toggle failed:', data.message || 'Unknown error');
         }
-      }).catch(()=>{});
+      })
+      .catch((error)=>{
+        console.error('[BOOKMARK] Fetch error:', error);
+      });
     }
 
     // Desktop sidebar toggle
@@ -446,10 +503,17 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
 
     let currentScholarshipId = null;
     function showScholarshipDetails(scholarshipId) {
+      console.log('[MODAL] Opening scholarship details for ID:', scholarshipId);
       currentScholarshipId = scholarshipId;
+      
       fetch('{{ url('api/scholarships') }}/' + scholarshipId, { credentials: 'same-origin' })
-        .then(r=> r.ok ? r.json() : Promise.reject())
+        .then(r=> {
+          console.log('[MODAL] Response status:', r.status);
+          return r.ok ? r.json() : Promise.reject('Response not OK');
+        })
         .then(data=>{
+          console.log('[MODAL] Scholarship data received:', data);
+          
           document.getElementById('modalLogo').src = data.image_path ? ('{{ url('../../') }}/' + data.image_path) : '{{ asset('assets/Images/image.png') }}';
           document.getElementById('modalTitle').textContent = data.title || '';
           document.getElementById('modalSponsor').textContent = data.sponsor || '';
@@ -464,21 +528,15 @@ const img = document.createElement('img'); img.alt = 'logo'; img.src = (s.image_
           else if (data.end_date) dateRange = 'Until ' + data.end_date;
           document.getElementById('modalDate').textContent = dateRange;
           document.getElementById('modalContact').textContent = data.email || data.phone || 'N/A';
-          const applyBtn = document.getElementById('applyBtn'); if (applyBtn) { applyBtn.style.display = 'none'; }
+          
+          console.log('[MODAL] Opening Bootstrap modal');
           const modal = new bootstrap.Modal(document.getElementById('scholarshipModal'));
           modal.show();
-        }).catch(()=>{ alert('Failed to load scholarship details'); });
-    }
-
-    function submitApplication(scholarshipId) {
-      const applyBtn = document.getElementById('applyBtn');
-      applyBtn.disabled = true; applyBtn.textContent = 'APPLYING...';
-      const formData = new FormData(); formData.append('scholarship_id', scholarshipId);
-      fetch('{{ url('api/applications') }}', { method: 'POST', body: formData, credentials: 'same-origin', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } })
-        .then(r=>r.json()).then(data=>{
-          if (data.success) { applyBtn.textContent='APPLIED ✓'; applyBtn.style.backgroundColor='#28a745'; alert('Application submitted successfully!'); }
-          else { applyBtn.textContent='APPLY'; applyBtn.disabled=false; alert(data.error || 'Failed to submit application'); }
-        }).catch(()=>{ applyBtn.textContent='APPLY'; applyBtn.disabled=false; alert('Failed to submit application'); });
+        })
+        .catch((error)=>{ 
+          console.error('[MODAL] Failed to load scholarship details:', error);
+          alert('Failed to load scholarship details'); 
+        });
     }
   </script>
 </body>

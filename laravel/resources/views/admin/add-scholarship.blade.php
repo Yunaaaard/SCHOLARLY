@@ -201,11 +201,14 @@
         <div class="row mb-3">
           <div class="col-md-6">
             <label class="form-label fw-semibold">Start Date</label>
-            <input type="date" class="form-control" name="start_date" value="{{ old('start_date') }}">
+            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ old('start_date') }}">
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">End Date</label>
-            <input type="date" class="form-control" name="end_date" value="{{ old('end_date') }}">
+            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ old('end_date') }}">
+            <div class="invalid-feedback" id="endDateError" style="display: none;">
+              End date must be after the start date
+            </div>
           </div>
         </div>
 
@@ -444,6 +447,52 @@
         }
       }
     })();
+
+    // Date Validation: End date must be after start date
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const endDateError = document.getElementById('endDateError');
+
+    function validateDates() {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      // Only validate if both dates are filled
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        // End date must be strictly after start date (not equal, not before)
+        if (end <= start) {
+          endDateInput.classList.add('is-invalid');
+          endDateError.style.display = 'block';
+          return false;
+        } else {
+          endDateInput.classList.remove('is-invalid');
+          endDateError.style.display = 'none';
+          return true;
+        }
+      }
+      
+      // If dates not filled, clear validation
+      endDateInput.classList.remove('is-invalid');
+      endDateError.style.display = 'none';
+      return true;
+    }
+
+    // Validate on change
+    startDateInput.addEventListener('change', validateDates);
+    endDateInput.addEventListener('change', validateDates);
+
+    // Validate on form submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+      if (!validateDates()) {
+        e.preventDefault();
+        endDateInput.focus();
+        alert('Please ensure the end date is after the start date.');
+        return false;
+      }
+    });
   </script>
 </body>
 </html>

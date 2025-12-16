@@ -76,11 +76,13 @@ class AdminController extends Controller
 
         $query = $request->input('q', '');
         $students = DB::table('users')
-            ->select('id', 'username', 'email', 'contact');
+            ->select('id', 'first_name', 'last_name', 'username', 'email', 'contact');
 
         if ($query) {
             $students->where(function($q) use ($query) {
                 $q->where('username', 'like', "%{$query}%")
+                  ->orWhere('first_name', 'like', "%{$query}%")
+                  ->orWhere('last_name', 'like', "%{$query}%")
                   ->orWhere('email', 'like', "%{$query}%")
                   ->orWhere('contact', 'like', "%{$query}%");
             });
@@ -120,7 +122,7 @@ class AdminController extends Controller
 
         $student = DB::table('users')
             ->where('id', $id)
-            ->select('id', 'username', 'email', 'contact')
+            ->select('id', 'first_name', 'last_name', 'username', 'email', 'contact')
             ->first();
 
         if (!$student) {
@@ -128,8 +130,8 @@ class AdminController extends Controller
         }
 
         $scholarships = DB::table('scholarships as s')
-            ->join('applications as a', 's.id', '=', 'a.scholarship_id')
-            ->where('a.user_id', $id)
+            ->join('bookmarks as b', 's.id', '=', 'b.scholarship_id')
+            ->where('b.user_id', $id)
             ->select('s.title')
             ->get()
             ->pluck('title')
@@ -137,6 +139,8 @@ class AdminController extends Controller
 
         $studentData = [
             'id' => $student->id,
+            'first_name' => $student->first_name,
+            'last_name' => $student->last_name,
             'username' => $student->username,
             'email' => $student->email,
             'contact' => $student->contact,
