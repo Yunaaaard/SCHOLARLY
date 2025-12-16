@@ -65,4 +65,5 @@ echo "Setting up assets..."
 chmod -R 755 public
 
 echo "Starting server..."
-php -S 0.0.0.0:${PORT:-8080} -t public public/index.php
+cd public
+php -S 0.0.0.0:${PORT:-8080}
