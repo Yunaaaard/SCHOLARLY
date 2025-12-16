@@ -28,5 +28,15 @@ php artisan cache:clear
 php artisan view:clear
 php artisan route:clear
 
+echo "Checking Laravel installation..."
+php artisan --version
+
+echo "Listing storage directory..."
+ls -la storage/
+
+echo "Checking logs..."
+touch storage/logs/laravel.log
+chmod 777 storage/logs/laravel.log
+
 echo "Starting server..."
 php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
