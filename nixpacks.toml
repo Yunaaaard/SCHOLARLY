@@ -1,0 +1,14 @@
+providers = ["php"]
+
+[phases.setup]
+nixPkgs = ["php82", "php82Packages.composer"]
+cmds = ["cd laravel"]
+
+[phases.install]
+cmds = ["cd laravel && composer install --no-dev --optimize-autoloader"]
+
+[phases.build]
+cmds = ["cd laravel && php artisan config:cache && php artisan route:cache && php artisan view:cache"]
+
+[start]
+cmd = "bash start.sh"
