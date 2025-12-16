@@ -58,5 +58,11 @@ echo "Checking logs..."
 touch storage/logs/laravel.log
 chmod 777 storage/logs/laravel.log
 
+echo "Creating symbolic link for storage..."
+php artisan storage:link || echo "Storage link already exists"
+
+echo "Setting up assets..."
+chmod -R 755 public
+
 echo "Starting server..."
-php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+php -S 0.0.0.0:${PORT:-8080} -t public public/index.php
