@@ -48,7 +48,7 @@
     <div class="row g-0">
       <div class="col-md-8 left">
         <a href="{{ route('index') }}" class="back-arrow">&#8592; Back</a>
-        <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo img-fluid">
+        <img src="/assets/Images/Group 44.png" alt="Scholarly Logo" class="logo img-fluid">
       </div>
       <div class="col-md-4 right">
         <form class="reset-form" method="POST" action="{{ route('reset-password.post') }}">
@@ -57,13 +57,13 @@
           <h4 class="mb-3 text-center" style="color: #333; font-weight: 600;">Reset Password</h4>
           <div class="input-group mb-3">
             <span class="input-group-text">
-              <img src="{{ asset('assets/images/weui_lock-outlined.png') }}" alt="Password" width="20">
+              <img src="/assets/Images/weui_lock-outlined.png" alt="Password" width="20">
             </span>
             <input name="password" type="password" class="form-control" placeholder="New Password" required minlength="6">
           </div>
           <div class="input-group mb-3">
             <span class="input-group-text">
-              <img src="{{ asset('assets/images/weui_lock-outlined.png') }}" alt="Password" width="20">
+              <img src="/assets/Images/weui_lock-outlined.png" alt="Password" width="20">
             </span>
             <input name="password_confirmation" type="password" class="form-control" placeholder="Confirm New Password" required minlength="6">
           </div>

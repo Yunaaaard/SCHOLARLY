@@ -49,7 +49,7 @@
     <div class="row g-0">
       <div class="col-md-8 left">
         <a href="{{ route('index') }}" class="back-arrow">&#8592; Back</a>
-        <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo img-fluid">
+        <img src="/assets/Images/Group 44.png" alt="Scholarly Logo" class="logo img-fluid">
       </div>
       <div class="col-md-4 right">
         <form class="forgot-form" method="POST" action="{{ route('forgot-password.post') }}">
@@ -58,7 +58,7 @@
           <p class="info-text">Enter your email address and we'll send you a link to reset your password.</p>
           <div class="input-group mb-3">
             <span class="input-group-text">
-              <img src="{{ asset('assets/images/iconamoon_email-light.png') }}" alt="Email" width="20" onerror="this.style.display='none'">
+              <img src="/assets/Images/iconamoon_email-light.png" alt="Email" width="20" onerror="this.style.display='none'">
             </span>
             <input name="email" type="email" class="form-control" placeholder="Email Address" value="{{ old('email') }}" required>
           </div>

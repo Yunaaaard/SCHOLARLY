@@ -52,20 +52,20 @@
     <div class="row g-0">
       <div class="col-md-8 left">
         <a href="{{ route('index') }}" class="back-arrow">&#8592; Back</a>
-        <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo img-fluid">
+        <img src="/assets/Images/Group 44.png" alt="Scholarly Logo" class="logo img-fluid">
       </div>
       <div class="col-md-4 right">
         <form class="login-form" method="POST" action="{{ route('login.post') }}">
           @csrf
           <div class="input-group mb-3">
             <span class="input-group-text">
-              <img src="{{ asset('assets/images/Vector.png') }}" alt="User" width="20">
+              <img src="/assets/Images/Vector.png" alt="User" width="20">
             </span>
             <input name="username_email" type="text" class="form-control" placeholder="Username/Email" value="{{ old('username_email') }}" required>
           </div>
           <div class="input-group mb-2">
             <span class="input-group-text">
-              <img src="{{ asset('assets/images/weui_lock-outlined.png') }}" alt="Password" width="20">
+              <img src="/assets/Images/weui_lock-outlined.png" alt="Password" width="20">
             </span>
             <input name="password" type="password" class="form-control" placeholder="Password" required>
           </div>

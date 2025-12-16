@@ -69,7 +69,7 @@
     <div class="row g-0">
       <div class="col-md-7 left">
         <a href="{{ route('login') }}" class="back-arrow">&#8592; Back</a>
-        <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo" class="logo img-fluid">
+        <img src="/assets/Images/Group 44.png" alt="Scholarly Logo" class="logo img-fluid">
       </div>
       <div class="col-md-5 right">
         <form class="signup-form" action="{{ route('register.post') }}" method="POST">
