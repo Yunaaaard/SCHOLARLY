@@ -11,10 +11,10 @@
   <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
 </head>
 <body>
-  <div style="min-height: 100vh; display: flex; flex-direction: column; background-image: url('{{ asset('assets/images/HOME PAGE.png') }}'); background-size: cover; background-position: center;">
+  <div style="min-height: 100vh; display: flex; flex-direction: column; background-image: url('{{ asset('assets/Images/HOME PAGE.png') }}'); background-size: cover; background-position: center;">
     <div class="navbar">
       <div class="nav-left">
-        <img src="{{ asset('assets/images/Group 44.png') }}" alt="Scholarly Logo"/>
+        <img src="{{ asset('assets/Images/Group 44.png') }}" alt="Scholarly Logo"/>
       </div>
       <div class="nav-right">
         <a href="/" class="nav-btn">Home</a>
