@@ -1,0 +1,6 @@
+{
+  "name": "Scholarly-PHP",
+  "description": "Scholarship Management System",
+  "keywords": ["php", "laravel"],
+  "buildpack": "heroku/php"
+}
